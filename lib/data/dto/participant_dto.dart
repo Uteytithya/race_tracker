@@ -17,6 +17,7 @@ class ParticipantDTO {
 
   static Participant fromJson(Map<String, dynamic> json) {
     return Participant(
+      bib: json['bib'],
       name: json['name'],
       gender: genderFromString(json['gender']),
       age: json['age'],
