@@ -1,4 +1,5 @@
-import 'package:race_tracker/repository/participant_mock.dart';
+
+import 'package:race_tracker/data/mock_data/mock_data.dart';
 
 import '../model/participant.dart';
 

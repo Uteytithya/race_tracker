@@ -15,6 +15,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) => ParticipantProvider(),
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Race Tracker',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),

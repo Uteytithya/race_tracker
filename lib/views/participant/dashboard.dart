@@ -25,23 +25,28 @@ class DashboardScreen extends StatelessWidget {
           ),
 
           // Semi-transparent overlay (optional)
-          Container(
-            color: Colors.black.withOpacity(0.2),
-          ),
+          Container(color: Colors.black.withOpacity(0.2)),
 
           // Content
           Column(
             children: [
               const SizedBox(height: 80), // Space from top
-              const Center(
-                child: Text(
-                  'Dashboard',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+              Row(
+                children: [
+                  Container(
+                    width: 400,
+                    margin: const EdgeInsets.only(left: 20),
+                    child: Text(
+                      'Dashboard',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
-                ),
+                  SizedBox(width: 40),
+                ],
               ),
             ],
           ),
@@ -55,9 +60,7 @@ class DashboardScreen extends StatelessWidget {
             child: Container(
               decoration: const BoxDecoration(
                 color: Color(0xFF4758E0),
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(30),
-                ),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
               ),
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -67,19 +70,27 @@ class DashboardScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Participant List',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                      Container(
+                        margin: const EdgeInsets.only(left: 8),
+                        width: 200,
+                        child: const Text(
+                          'Participant List',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                       IconButton(
                         onPressed: () {
                           Navigator.pushNamed(context, '/create');
                         },
-                        icon: const Icon(Icons.add_circle, color: Colors.white, size: 28),
+                        icon: const Icon(
+                          Icons.add_circle,
+                          color: Colors.white,
+                          size: 28,
+                        ),
                       ),
                     ],
                   ),
@@ -88,21 +99,34 @@ class DashboardScreen extends StatelessWidget {
 
                   // Table Header (BIB and Participant)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFF101248),
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Row(
                       children: [
                         Text(
                           'BIB',
-                          style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                        Text(
-                          'Participant',
-                          style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold),
+                        Container(
+                          width: 200,
+                          margin: const EdgeInsets.only(left: 16),
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Text(
+                            'Participant',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -112,19 +136,22 @@ class DashboardScreen extends StatelessWidget {
 
                   // Participant List
                   Expanded(
-                    child: participants.isEmpty
-                        ? const Center(
-                            child: Text(
-                              'No participants yet',
-                              style: TextStyle(color: Colors.white54),
+                    child:
+                        participants.isEmpty
+                            ? const Center(
+                              child: Text(
+                                'No participants yet',
+                                style: TextStyle(color: Colors.white54),
+                              ),
+                            )
+                            : ListView.builder(
+                              itemCount: participants.length,
+                              itemBuilder: (context, index) {
+                                return ParticipantTile(
+                                  participant: participants[index],
+                                );
+                              },
                             ),
-                          )
-                        : ListView.builder(
-                            itemCount: participants.length,
-                            itemBuilder: (context, index) {
-                              return ParticipantTile(participant: participants[index]);
-                            },
-                          ),
                   ),
                 ],
               ),

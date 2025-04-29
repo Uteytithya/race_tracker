@@ -1,8 +1,10 @@
+import 'package:race_tracker/utils/enum.dart';
+
 class Participant {
   final int bib;
   final String name;
   final int age;
-  final String gender;
+  final Gender gender;
 
   Participant({
     required this.bib,
@@ -11,21 +13,8 @@ class Participant {
     required this.gender,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'bib': bib,
-      'name': name,
-      'age': age,
-      'gender': gender,
-    };
-  }
-
-  factory Participant.fromMap(Map<String, dynamic> map) {
-    return Participant(
-      bib: map['bib'],
-      name: map['name'],
-      age: map['age'],
-      gender: map['gender'],
-    );
+  @override
+  String toString() {
+    return '\nParticipant\n{\n\tname: $name,\n\tgender: ${gender.name},\n\tage: $age\n}\n';
   }
 }

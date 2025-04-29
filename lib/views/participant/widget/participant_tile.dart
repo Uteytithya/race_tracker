@@ -31,8 +31,10 @@ class ParticipantTile extends StatelessWidget {
                 fontSize: 16.0,
               ),
             ),
-            const SizedBox(width: 16),
-            Expanded(
+            Container(
+              width: 200,
+              margin: const EdgeInsets.only(left: 16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Text(
                 participant.name,
                 style: const TextStyle(fontSize: 16.0),
