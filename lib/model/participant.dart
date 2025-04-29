@@ -1,11 +1,17 @@
 import 'package:race_tracker/utils/enum.dart';
 
-class Participant{
-  String name;
-  Gender gender;
-  int age;
+class Participant {
+  final int bib;
+  final String name;
+  final int age;
+  final Gender gender;
 
-  Participant({required this.name, required this.gender, required this.age});
+  Participant({
+    required this.bib,
+    required this.name,
+    required this.age,
+    required this.gender,
+  });
 
   @override
   String toString() {
