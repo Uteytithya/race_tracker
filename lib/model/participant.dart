@@ -31,4 +31,8 @@ class Participant {
   static int generateBib() {
     return _bibCounter++;
   }
+
+  static void incrementBibCounter() {
+    _bibCounter++;
+  }
 }

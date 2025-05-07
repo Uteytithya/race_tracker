@@ -17,15 +17,7 @@ void main() async {
 
   FirebaseParticipantRepository repo = FirebaseParticipantRepository();
 
-  // Wait for the participant to be added
-  await repo.addParticipant(
-    Participant(name: "Tithya", age: 24, gender: Gender.male),
-  );
-
-  // Fetch and log all participants
-  Logger log = Logger();
-  final participants = await repo.getAllParticipants();
-  log.i(participants);
+  repo.addParticipant(Participant(name: "Tithya", age: 24, gender: Gender.male));
 
   runApp(const MyApp());
 }

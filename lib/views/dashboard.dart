@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:race_tracker/model/participant.dart';
 import 'package:race_tracker/utils/enum.dart';
 import 'package:race_tracker/views/participant/widget/participant_tile.dart';
 import 'package:race_tracker/widget/navbar.dart';
@@ -136,65 +137,83 @@ class DashboardScreen extends StatelessWidget {
 
                   // Participant List
                   Expanded(
-                    child:
-                        participants.isEmpty
-                            ? const Center(
-                              child: Text(
-                                'No participants yet',
-                                style: TextStyle(color: Colors.white54),
-                              ),
-                            )
-                            : ListView.builder(
-                              itemCount: participants.length,
-                              itemBuilder: (context, index) {
-                                final participant = participants[index];
+                    child: FutureBuilder<List<Participant>>(
+                      future: participants,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else if (snapshot.hasError) {
+                          return const Center(
+                            child: Text(
+                              'Error loading participants',
+                              style: TextStyle(color: Colors.white54),
+                            ),
+                          );
+                        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                          return const Center(
+                            child: Text(
+                              'No participants yet',
+                              style: TextStyle(color: Colors.white54),
+                            ),
+                          );
+                        } else {
+                          final participants = snapshot.data!;
+                          return ListView.builder(
+                            itemCount: participants.length,
+                            itemBuilder: (context, index) {
+                              final participant = participants[index];
 
-                                return Dismissible(
-                                  key: Key(participant.bib.toString()),
-                                  background: Container(
-                                    color: Colors.red,
-                                    alignment: Alignment.centerRight,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 20,
-                                    ),
-                                    child: const Icon(
-                                      Icons.delete,
-                                      color: Colors.white,
-                                    ),
+                              return Dismissible(
+                                key: Key(participant.bib.toString()),
+                                background: Container(
+                                  color: Colors.red,
+                                  alignment: Alignment.centerRight,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
                                   ),
-                                  direction: DismissDirection.endToStart,
-                                  onDismissed: (_) {
-                                    final removed = participant;
+                                  child: const Icon(
+                                    Icons.delete,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                direction: DismissDirection.endToStart,
+                                onDismissed: (_) {
+                                  final removed = participant;
 
-                                    context
-                                        .read<ParticipantProvider>()
-                                        .removeParticipant(removed);
+                                  context
+                                      .read<ParticipantProvider>()
+                                      .removeParticipant(removed);
 
-                                    showCustomToast(
-                                      context: context,
-                                      message: 'Participant removed',
-                                      onUndo: () {
-                                        context
-                                            .read<ParticipantProvider>()
-                                            .addParticipant(removed);
-                                      },
+                                  showCustomToast(
+                                    context: context,
+                                    message: 'Participant removed',
+                                    onUndo: () {
+                                      context
+                                          .read<ParticipantProvider>()
+                                          .addParticipant(removed);
+                                    },
+                                  );
+                                },
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.pushNamed(
+                                      context,
+                                      '/edit',
+                                      arguments: participant,
                                     );
                                   },
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      Navigator.pushNamed(
-                                        context,
-                                        '/edit',
-                                        arguments: participant,
-                                      );
-                                    },
-                                    child: ParticipantTile(
-                                      participant: participant,
-                                    ),
+                                  child: ParticipantTile(
+                                    participant: participant,
                                   ),
-                                );
-                              },
-                            ),
+                                ),
+                              );
+                            },
+                          );
+                        }
+                      },
+                    ),
                   ),
                 ],
               ),

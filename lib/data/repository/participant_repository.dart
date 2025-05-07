@@ -7,4 +7,5 @@ abstract class ParticipantRepository {
   Future<void> updateParticipant(int index, Participant updatedParticipant);
   Future<void> clearParticipants();
   Future<Participant?> getParticipantByBib(int bib);  
+  
 }

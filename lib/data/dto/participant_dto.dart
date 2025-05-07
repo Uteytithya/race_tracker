@@ -4,6 +4,7 @@ import 'package:race_tracker/utils/enum.dart';
 class ParticipantDTO {
   static Map<String, dynamic> toJson(Participant model) {
     return {
+      'bib': model.bib,
       'name': model.name,
       'gender': model.gender.name, // Convert enum to string
       'age': model.age,

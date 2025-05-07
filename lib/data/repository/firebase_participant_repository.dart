@@ -21,6 +21,7 @@ class FirebaseParticipantRepository extends ParticipantRepository {
       List<Participant> participants = [];
       final data = Map<String, dynamic>.from(snapshot.value as Map);
       data.forEach((key, value) {
+        Participant.incrementBibCounter();
         participants.add(
           ParticipantDTO.fromJson(Map<String, dynamic>.from(value)),
         );
@@ -43,7 +44,7 @@ class FirebaseParticipantRepository extends ParticipantRepository {
       logger.i("Added Participant: $participant");
     } catch (e) {
       // Log the error or handle it appropriately
-      print("Error adding participant: $e");
+      logger.e("Error adding participant: $e");
     }
   }
 
