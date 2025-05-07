@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "806638526502",
+    "firebase_url": "https://racetracker-a6b37-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "racetracker-a6b37",
+    "storage_bucket": "racetracker-a6b37.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:806638526502:android:e47e575bda30777a2486e7",
+        "android_client_info": {
+          "package_name": "com.example.race_tracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBb35F690pHG_tAZQHnRE2vfy33yvHpTZ0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,9 +1,30 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
+import 'package:race_tracker/data/repository/firebase_participant_repository.dart';
+import 'package:race_tracker/firebase_options.dart';
+import 'package:race_tracker/model/participant.dart';
+import 'package:race_tracker/utils/enum.dart';
 import 'views/participant/dashboard.dart';
 import 'provider/participant_provider.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  FirebaseParticipantRepository repo = FirebaseParticipantRepository();
+
+  // Wait for the participant to be added
+  await repo.addParticipant(
+    Participant(name: "Tithya", age: 24, gender: Gender.male),
+  );
+
+  // Fetch and log all participants
+  Logger log = Logger();
+  final participants = await repo.getAllParticipants();
+  log.i(participants);
+
   runApp(const MyApp());
 }
 
@@ -26,7 +47,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});

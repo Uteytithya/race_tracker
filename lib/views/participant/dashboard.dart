@@ -34,7 +34,7 @@ class DashboardScreen extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    width: 400,
+                    width: 300,
                     margin: const EdgeInsets.only(left: 20),
                     child: Text(
                       'Dashboard',
