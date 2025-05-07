@@ -14,7 +14,7 @@ class Participant {
   }) : bib = bib ?? generateBib() {
     if (name.isEmpty) {
       throw ArgumentError('Name cannot be empty');
-    }
+    } 
     if (age < 0) {
       throw ArgumentError('Age cannot be negative');
     }
