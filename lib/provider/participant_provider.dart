@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../model/participant.dart';
-import '../repository/participant_repository.dart';
+import '../data/repository/participant_repository.dart';
 
 class ParticipantProvider extends ChangeNotifier {
   final ParticipantRepository _repository = ParticipantRepository();
