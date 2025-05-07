@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:race_tracker/utils/enum.dart';
 import 'package:race_tracker/views/participant/widget/participant_tile.dart';
 import 'package:race_tracker/widget/navbar.dart';
-import '../../../provider/participant_provider.dart';
+import '../../provider/participant_provider.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -14,7 +15,7 @@ class DashboardScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // Background (full screen image)
+          // Background
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -24,19 +25,19 @@ class DashboardScreen extends StatelessWidget {
             ),
           ),
 
-          // Semi-transparent overlay (optional)
+          // Overlay
           Container(color: Colors.black.withOpacity(0.2)),
 
-          // Content
+          // Header
           Column(
             children: [
-              const SizedBox(height: 80), // Space from top
+              const SizedBox(height: 80),
               Row(
                 children: [
                   Container(
                     width: 400,
                     margin: const EdgeInsets.only(left: 20),
-                    child: Text(
+                    child: const Text(
                       'Dashboard',
                       style: TextStyle(
                         fontSize: 28,
@@ -45,13 +46,12 @@ class DashboardScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(width: 40),
                 ],
               ),
             ],
           ),
 
-          // Floating Participant List
+          // Participant List Section
           Positioned(
             top: 180,
             left: 0,
@@ -66,7 +66,7 @@ class DashboardScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Title and Add Button
+                  // Header + Add button
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -97,7 +97,7 @@ class DashboardScreen extends StatelessWidget {
 
                   const SizedBox(height: 10),
 
-                  // Table Header (BIB and Participant)
+                  // Table Header
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -109,7 +109,7 @@ class DashboardScreen extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        Text(
+                        const Text(
                           'BIB',
                           style: TextStyle(
                             color: Colors.white70,
@@ -120,7 +120,7 @@ class DashboardScreen extends StatelessWidget {
                           width: 200,
                           margin: const EdgeInsets.only(left: 16),
                           padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Text(
+                          child: const Text(
                             'Participant',
                             style: TextStyle(
                               color: Colors.white70,
@@ -147,8 +147,51 @@ class DashboardScreen extends StatelessWidget {
                             : ListView.builder(
                               itemCount: participants.length,
                               itemBuilder: (context, index) {
-                                return ParticipantTile(
-                                  participant: participants[index],
+                                final participant = participants[index];
+
+                                return Dismissible(
+                                  key: Key(participant.bib.toString()),
+                                  background: Container(
+                                    color: Colors.red,
+                                    alignment: Alignment.centerRight,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                    ),
+                                    child: const Icon(
+                                      Icons.delete,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  direction: DismissDirection.endToStart,
+                                  onDismissed: (_) {
+                                    final removed = participant;
+
+                                    context
+                                        .read<ParticipantProvider>()
+                                        .removeParticipant(removed);
+
+                                    showCustomToast(
+                                      context: context,
+                                      message: 'Participant removed',
+                                      onUndo: () {
+                                        context
+                                            .read<ParticipantProvider>()
+                                            .addParticipant(removed);
+                                      },
+                                    );
+                                  },
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.pushNamed(
+                                        context,
+                                        '/edit',
+                                        arguments: participant,
+                                      );
+                                    },
+                                    child: ParticipantTile(
+                                      participant: participant,
+                                    ),
+                                  ),
                                 );
                               },
                             ),
