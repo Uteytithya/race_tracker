@@ -9,6 +9,11 @@ enum Gender{
   const Gender(this.name);
 }
 
+enum RaceStatus{
+  // ignore: constant_identifier_names
+  not_started, ongoing, finished
+}
+
 
 
 void showCustomToast({
