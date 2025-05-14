@@ -1,37 +1,64 @@
 {
   "participants": {
     "1001": {
-      "fullName": "Nuon Utyetthiya",
+      "name": "Nuon Uteytithya",
       "gender": "Male",
       "age": 24,
       "bib": "1001"
     },
     "1002": {
-      "fullName": "Jane Doe",
+      "name": "Jane Doe",
       "gender": "Female",
       "age": 30,
       "bib": "1002"
     }
   },
   "stamps": {
-    "stamp1": {
+    "S-001": {
       "time": "2025-05-14T09:15:32Z",
       "bib": "1001",
       "segment": "swim"
     },
-    "stamp2": {
+    "S-002": {
       "time": "2025-05-14T09:45:01Z",
       "bib": "1002",
       "segment": "cycle"
     }
   },
-  "deletedStamps": {},
-  "raceStatus": {
-    "status": "not_started",
-    "startTime": "",
-    "finishTime": "",
-    "participantsLeft": 2
+  "deletedStamps": {
+    "S-001": {
+      "time": "2025-05-14T09:15:32Z",
+      "bib": "1001",
+      "segment": "swim"
+    },
+    "S-002": {
+      "time": "2025-05-14T09:45:01Z",
+      "bib": "1002",
+      "segment": "cycle"
+    }
   },
-  "segments": ["swim", "cycle", "run"],
-  "results": {}
+  "results": {
+    "1001": {
+      "bib": "1001",
+      "name": "Nuon Uyetthiya",
+      "totalTime": 3420, 
+      "segmentTimes": {
+        "swim": 900,
+        "bike": 1800,
+        "run": 720
+      },
+      "rank": 1
+    },
+    "1002": {
+      "bib": "1002",
+      "name": "Jane Doe",
+      "totalTime": 3540,
+      "segmentTimes": {
+        "swim": 920,
+        "bike": 1820,
+        "run": 800
+      },
+      "rank": 2
+    }
+  }
 }

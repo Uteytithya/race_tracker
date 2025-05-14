@@ -23,13 +23,11 @@ class FirebaseStampRepository extends StampRepository {
 
     final stampsMap = snapshot.value as Map<Object?, Object?>;
 
-    final stamps =
-        stampsMap.entries.map((entry) {
-          final data = Map<String, dynamic>.from(entry.value as Map);
-          return StampDto.fromJson(data);
-        }).toList();
+    final stamps = stampsMap.entries.map((entry) {
+      final data = Map<String, dynamic>.from(entry.value as Map);
+      return StampDto.fromJson(data);
+    }).toList();
 
-    // Safely set the next available ID based on actual highest S-XXX
     final maxIdNum = stamps.fold<int>(0, (prev, s) {
       final match = RegExp(r'S-(\d{3})').firstMatch(s.id);
       if (match != null) {
@@ -57,7 +55,21 @@ class FirebaseStampRepository extends StampRepository {
   Future<void> updateStamp(Stamp stamp) async {
     final snapshot = await _stampRef.child(stamp.id).get();
     if (snapshot.exists) {
-      await _stampRef.child(stamp.id).update(StampDto.toJson(stamp));
+      if (stamp.bib != null && stamp.bib! > 0) {
+        // Transfer the stamp to the participant's stamp list
+        final participantRef =
+            FirebaseDatabase.instance.ref("participants");
+        await participantRef
+            .child(stamp.bib.toString())
+            .child("stamps")
+            .child(stamp.id)
+            .set(StampDto.toJson(stamp));
+        // Remove the stamp from the main stamps structure
+        await _stampRef.child(stamp.id).remove();
+      } else {
+        // No bib assigned; perform a normal update
+        await _stampRef.child(stamp.id).update(StampDto.toJson(stamp));
+      }
     } else {
       throw Exception("Stamp not found");
     }

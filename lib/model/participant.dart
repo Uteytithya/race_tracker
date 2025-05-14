@@ -1,3 +1,4 @@
+import 'package:race_tracker/model/stamp.dart';
 import 'package:race_tracker/utils/enum.dart';
 
 class Participant {
@@ -5,19 +6,29 @@ class Participant {
   final String name;
   final int age;
   final Gender gender;
+  final List<Stamp> stamps;
 
   Participant({
     int? bib,
     required this.name,
     required this.age,
     required this.gender,
-  }) : bib = bib ?? generateBib() {
+    List<Stamp>? stamps,
+  }) : bib = bib ?? generateBib(),
+       stamps = stamps ?? [] {
     if (name.isEmpty) {
       throw ArgumentError('Name cannot be empty');
     } 
     if (age < 0) {
       throw ArgumentError('Age cannot be negative');
     }
+  }
+
+  void addStamp(Stamp stamp) {
+    if (stamps.any((s) => s.segment == stamp.segment)) {
+      throw ArgumentError('Stamp for this segment already exists');
+    }
+    stamps.add(stamp);
   }
 
   @override

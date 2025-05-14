@@ -1,14 +1,13 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:logger/logger.dart';
 import 'package:race_tracker/data/dto/participant_dto.dart';
+import 'package:race_tracker/data/dto/stamp_dto.dart';
 import 'package:race_tracker/model/participant.dart';
+import 'package:race_tracker/model/stamp.dart';
 import 'participant_repository.dart';
 
 class FirebaseParticipantRepository extends ParticipantRepository {
-  final DatabaseReference _dbRef = FirebaseDatabase.instance.ref(
-    "participants",
-  );
-
+  final DatabaseReference _dbRef = FirebaseDatabase.instance.ref("participants");
   final Logger logger = Logger();
 
   @override
@@ -23,13 +22,14 @@ class FirebaseParticipantRepository extends ParticipantRepository {
       data.forEach((key, value) {
         Participant.incrementBibCounter();
         participants.add(
-          ParticipantDTO.fromJson(Map<String, dynamic>.from(value)),
+          ParticipantDTO.fromJson(
+            Map<String, dynamic>.from(value as Map),
+          ),
         );
       });
       logger.i("Participant List: \n$participants");
       return participants;
     } catch (e) {
-      // Log the error or handle it appropriately
       logger.e("Error fetching participants: $e");
       return [];
     }
@@ -38,13 +38,25 @@ class FirebaseParticipantRepository extends ParticipantRepository {
   @override
   Future<void> addParticipant(Participant participant) async {
     try {
-      await _dbRef
-          .child(participant.bib.toString())
-          .set(ParticipantDTO.toJson(participant));
+      await _dbRef.child(participant.bib.toString()).set(
+        ParticipantDTO.toJson(participant),
+      );
       logger.i("Added Participant: $participant");
     } catch (e) {
-      // Log the error or handle it appropriately
       logger.e("Error adding participant: $e");
+    }
+  }
+
+  Future<void> addStampToParticipant(int bib, Stamp stamp) async {
+    try {
+      await _dbRef
+          .child(bib.toString())
+          .child("stamps")
+          .child(stamp.id)
+          .set(StampDto.toJson(stamp));
+      logger.i("Added Stamp for Participant $bib: $stamp");
+    } catch (e) {
+      logger.e("Error adding stamp to participant: $e");
     }
   }
 
@@ -54,7 +66,6 @@ class FirebaseParticipantRepository extends ParticipantRepository {
       logger.i("Removed Participant: $participant");
       await _dbRef.child(participant.bib.toString()).remove();
     } catch (e) {
-      // Log the error or handle it appropriately
       logger.e("Error removing participant: $e");
     }
   }
@@ -70,7 +81,6 @@ class FirebaseParticipantRepository extends ParticipantRepository {
           .update(ParticipantDTO.toJson(updatedParticipant));
       logger.i("Updated Participant: $updatedParticipant");
     } catch (e) {
-      // Log the error or handle it appropriately
       logger.e("Error updating participant: $e");
     }
   }
@@ -79,9 +89,8 @@ class FirebaseParticipantRepository extends ParticipantRepository {
   Future<void> clearParticipants() async {
     try {
       await _dbRef.remove();
-      logger.i("Clear Participant in Firebase");
+      logger.i("Cleared Participants in Firebase");
     } catch (e) {
-      // Log the error or handle it appropriately
       logger.e("Error clearing participants: $e");
     }
   }
@@ -93,15 +102,12 @@ class FirebaseParticipantRepository extends ParticipantRepository {
       if (snapshot.value == null) {
         return null;
       }
-
       Participant participant = ParticipantDTO.fromJson(
         Map<String, dynamic>.from(snapshot.value as Map<String, dynamic>),
       );
-
       logger.i("Participant: $participant");
       return participant;
     } catch (e) {
-      // Log the error or handle it appropriately
       logger.e("Error fetching participant by bib: $e");
       return null;
     }

@@ -1,3 +1,4 @@
+import 'package:race_tracker/data/dto/stamp_dto.dart';
 import 'package:race_tracker/model/participant.dart';
 import 'package:race_tracker/utils/enum.dart';
 
@@ -8,6 +9,9 @@ class ParticipantDTO {
       gender: genderFromString(json['gender']),
       age: json['age'] as int,
       bib: int.tryParse(json['bib'].toString()) ?? 0,
+      stamps: json['stamps'] != null
+          ? StampDto.fromJsonList(json['stamps'])
+          : [],
     );
   }
 
@@ -17,6 +21,7 @@ class ParticipantDTO {
       'gender': participant.gender,
       'age': participant.age,
       'bib': participant.bib.toString(),
+      'stamps': StampDto.toJsonList(participant.stamps),
     };
   }
 
