@@ -2,32 +2,42 @@ import 'package:race_tracker/model/race.dart';
 import 'package:race_tracker/utils/enum.dart';
 
 class RaceDto {
-  static Map<String, dynamic> toJson(Race model) {
+  static Map<String, dynamic> toJson(Race race) {
     return {
-      'participants': model.participants,
-      'startTime': model.startTime,
-      'finishTime': model.finishTime,
-      'participantLeft': model.participantLeft,
-      'raceStatus': model.raceStatus.name,
+      "status": race.status,
+      "startTime": race.startTime,
+      "finishTime": race.finishTime,
+      "participantsLeft": race.participantsLeft,
     };
   }
 
-  static RaceStatus raceStatusFromString(String value) {
-    return RaceStatus.values.firstWhere(
-      (e) => e.name.toLowerCase() == value.toLowerCase(),
-      orElse: () {
-        throw Exception("Invalid race status value: $value");
-      },
+  static Race fromJson(Map<String, dynamic> raceStatus, List<String> segments) {
+    return Race(
+      status: raceStatus['status'] ?? 'not_started',
+      startTime: raceStatus['startTime'] ?? '',
+      finishTime: raceStatus['finishTime'] ?? '',
+      participantsLeft: raceStatus['participantsLeft'] ?? 0,
+      segments: segments,
     );
   }
 
-  static Race fromJson(Map<String, dynamic> json) {
-    return Race(
-      participants: json['participants'], 
-      startTime: json['startTime'].toIso8601String(),
-      finishTime: json['finishTime'].toIso8601String(),
-      participantLeft: json['participantLeft'],
-      raceStatus: raceStatusFromString(json['raceStatus']),
-    );
+  static List<String> segmentsFromJson(List<dynamic> segments) {
+    return segments.map((segment) => segment.toString()).toList();
+  }
+  static List<String> segmentsToJson(List<String> segments) {
+    return segments.map((segment) => segment.toString()).toList();
+  }
+
+  static RaceStatus statusFromJson(String status) {
+    switch (status) {
+      case 'not_started':
+        return RaceStatus.not_started;
+      case 'ongoing':
+        return RaceStatus.ongoing;
+      case 'finished':
+        return RaceStatus.finished;
+      default:
+        return RaceStatus.not_started;
+    }
   }
 }
