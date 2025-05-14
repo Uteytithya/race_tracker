@@ -14,8 +14,6 @@ enum RaceStatus{
   not_started, ongoing, finished
 }
 
-
-
 void showCustomToast({
   required BuildContext context,
   required String message,

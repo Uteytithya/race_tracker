@@ -20,4 +20,7 @@ class StampDto {
   static List<Stamp> fromJsonList(List<dynamic> jsonList) {
     return jsonList.map((json) => fromJson(json)).toList();
   }
+  static List<Map<String, dynamic>> toJsonList(List<Stamp> stampList) {
+    return stampList.map((stamp) => toJson(stamp)).toList();
+  }
 }
