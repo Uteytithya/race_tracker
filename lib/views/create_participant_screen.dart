@@ -6,8 +6,9 @@ class CreateParticipantScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: const Color(0xFF4758E0),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(
         children: [
           // Background image with dark overlay
@@ -28,8 +29,8 @@ class CreateParticipantScreen extends StatelessWidget {
             right: 0,
             bottom: 0,
             child: Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFF4758E0),
+              decoration: BoxDecoration(
+                color: theme.primaryColor,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
               ),
               padding: const EdgeInsets.all(20),
@@ -44,12 +45,11 @@ class CreateParticipantScreen extends StatelessWidget {
                         onPressed: () => Navigator.pop(context),
                       ),
                       const SizedBox(width: 8),
-                      const Text(
+                      Text(
                         'Create Participant',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                        style: theme.textTheme.headlineLarge?.copyWith(
                           color: Colors.white,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ],

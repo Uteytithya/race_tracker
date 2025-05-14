@@ -12,6 +12,7 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final participants = context.watch<ParticipantProvider>().participants;
+    final theme = Theme.of(context);
 
     return Scaffold(
       body: Stack(
@@ -38,13 +39,9 @@ class DashboardScreen extends StatelessWidget {
                   Container(
                     width: 300,
                     margin: const EdgeInsets.only(left: 20),
-                    child: const Text(
+                    child: Text(
                       'Dashboard',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                      style: theme.textTheme.headlineLarge,
                     ),
                   ),
                 ],
@@ -67,20 +64,23 @@ class DashboardScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header + Add button
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
                         margin: const EdgeInsets.only(left: 8),
                         width: 200,
-                        child: const Text(
+                        child: Text(
                           'Participant List',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                          style: theme.textTheme.displayLarge,
+                        ),
+                      ),
+                      Container(
+                        margin: const EdgeInsets.only(left: 8),
+                        width: 200,
+                        child: Text(
+                          'Participant List',
+                          style: theme.textTheme.displayLarge,
                         ),
                       ),
                       IconButton(
@@ -110,23 +110,14 @@ class DashboardScreen extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        const Text(
-                          'BIB',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        Text('BIB', style: theme.textTheme.labelSmall),
                         Container(
                           width: 200,
                           margin: const EdgeInsets.only(left: 16),
                           padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: const Text(
+                          child: Text(
                             'Participant',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: theme.textTheme.labelSmall,
                           ),
                         ),
                       ],
@@ -140,7 +131,8 @@ class DashboardScreen extends StatelessWidget {
                     child: FutureBuilder<List<Participant>>(
                       future: participants,
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return const Center(
                             child: CircularProgressIndicator(),
                           );
@@ -151,7 +143,8 @@ class DashboardScreen extends StatelessWidget {
                               style: TextStyle(color: Colors.white54),
                             ),
                           );
-                        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        } else if (!snapshot.hasData ||
+                            snapshot.data!.isEmpty) {
                           return const Center(
                             child: Text(
                               'No participants yet',

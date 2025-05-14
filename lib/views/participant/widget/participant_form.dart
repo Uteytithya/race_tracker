@@ -125,6 +125,7 @@ class _ParticipantFormState extends State<ParticipantForm> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Form(
       key: _formKey,
       child: Padding(
@@ -133,10 +134,10 @@ class _ParticipantFormState extends State<ParticipantForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Bib Number Field
-            const Text(
+            Text(
               'Bib Number',
-              style: TextStyle(
-                color: Colors.white,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onBackground,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -146,7 +147,7 @@ class _ParticipantFormState extends State<ParticipantForm> {
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: theme.colorScheme.background,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide.none,
@@ -166,10 +167,10 @@ class _ParticipantFormState extends State<ParticipantForm> {
             const SizedBox(height: 20),
 
             // Name Field
-            const Text(
+            Text(
               'Name',
-              style: TextStyle(
-                color: Colors.white,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onBackground,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -178,7 +179,7 @@ class _ParticipantFormState extends State<ParticipantForm> {
               controller: _nameController,
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: theme.colorScheme.background,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide.none,
@@ -195,10 +196,10 @@ class _ParticipantFormState extends State<ParticipantForm> {
             const SizedBox(height: 20),
 
             // Age Field
-            const Text(
+            Text(
               'Age',
-              style: TextStyle(
-                color: Colors.white,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onBackground,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -208,7 +209,7 @@ class _ParticipantFormState extends State<ParticipantForm> {
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: theme.colorScheme.background,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide.none,
@@ -228,10 +229,10 @@ class _ParticipantFormState extends State<ParticipantForm> {
             const SizedBox(height: 20),
 
             // Gender Selection
-            const Text(
+            Text(
               'Gender',
-              style: TextStyle(
-                color: Colors.white,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onBackground,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -239,7 +240,7 @@ class _ParticipantFormState extends State<ParticipantForm> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: theme.colorScheme.background,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: DropdownButtonHideUnderline(
@@ -271,8 +272,8 @@ class _ParticipantFormState extends State<ParticipantForm> {
               child: ElevatedButton(
                 onPressed: _isLoading ? null : _saveParticipant,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF101248),
-                  foregroundColor: Colors.white,
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: theme.colorScheme.onPrimary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -281,7 +282,7 @@ class _ParticipantFormState extends State<ParticipantForm> {
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
                         widget.participant == null ? 'Create' : 'Update',
-                        style: const TextStyle(
+                        style: theme.textTheme.labelSmall?.copyWith(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),

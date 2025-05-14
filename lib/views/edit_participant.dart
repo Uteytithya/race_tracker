@@ -9,7 +9,7 @@ class EditParticipantScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Get the participant passed as argument from the route
     final participant = ModalRoute.of(context)!.settings.arguments as Participant;
-
+    final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: const Color(0xFF4758E0),
       body: Stack(
@@ -48,12 +48,11 @@ class EditParticipantScreen extends StatelessWidget {
                         onPressed: () => Navigator.pop(context),
                       ),
                       const SizedBox(width: 8),
-                      const Text(
+                      Text(
                         'Edit Participant',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                        style: theme.textTheme.headlineLarge?.copyWith(
                           color: Colors.white,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ],
