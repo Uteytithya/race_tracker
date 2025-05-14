@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:race_tracker/utils/enum.dart';
 import 'package:race_tracker/model/participant.dart';
@@ -24,6 +25,7 @@ class _ParticipantFormState extends State<ParticipantForm> {
   late final TextEditingController _ageController;
   Gender _selectedGender = Gender.male;
   bool _isLoading = false;
+  final Logger logger = Logger();
 
   @override
   void initState() {
@@ -75,7 +77,8 @@ class _ParticipantFormState extends State<ParticipantForm> {
       
       // Check if bib number already exists
       if (widget.participant == null) {
-        final existingParticipant = provider.getByBib(participant.bib);
+        final existingParticipant = await provider.getByBib(participant.bib);
+        logger.w("Existing Participant: $existingParticipant");
         if (existingParticipant != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -91,7 +94,8 @@ class _ParticipantFormState extends State<ParticipantForm> {
         provider.addParticipant(participant);
       } else {
         // Find index of participant to update
-        final index = provider.participants.indexWhere(
+        final participants = await provider.participants;
+        final index = participants.indexWhere(
           (p) => p.bib == widget.participant!.bib,
         );
         if (index != -1) {

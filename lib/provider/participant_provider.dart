@@ -1,33 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:race_tracker/data/repository/firebase_participant_repository.dart';
 import '../model/participant.dart';
-import '../data/repository/participant_repository.dart';
 
 class ParticipantProvider extends ChangeNotifier {
-  final ParticipantRepository _repository = ParticipantRepository();
+  final FirebaseParticipantRepository _repository = FirebaseParticipantRepository();
 
-  List<Participant> get participants => _repository.getAll();
+  Future<List<Participant>> get participants => _repository.getAllParticipants();
 
   void addParticipant(Participant participant) {
-    _repository.add(participant);
+    _repository.addParticipant(participant);
     notifyListeners();
   }
 
   void removeParticipant(Participant participant) {
-    _repository.remove(participant);
+    _repository.removeParticipant(participant);
     notifyListeners();
   }
 
   void updateParticipant(int index, Participant updatedParticipant) {
-    _repository.update(index, updatedParticipant);
+    _repository.updateParticipant(index, updatedParticipant);
     notifyListeners();
   }
 
   void clearParticipants() {
-    _repository.clear();
+    _repository.clearParticipants();
     notifyListeners();
   }
 
-  Participant? getByBib(int bib) {
-    return _repository.getByBib(bib);
+  Future<Participant?> getByBib(int bib) {
+    return _repository.getParticipantByBib(bib);
   }
 }

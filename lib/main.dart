@@ -1,12 +1,24 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
+import 'package:race_tracker/data/repository/firebase_participant_repository.dart';
+import 'package:race_tracker/firebase_options.dart';
+import 'package:race_tracker/model/participant.dart';
+import 'package:race_tracker/utils/enum.dart';
 import 'package:race_tracker/provider/participant_provider.dart';
 import 'package:race_tracker/views/create_participant_screen.dart';
 import 'package:race_tracker/views/dashboard.dart';
 import 'package:race_tracker/views/edit_participant.dart';
 
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-void main() {
+  FirebaseParticipantRepository repo = FirebaseParticipantRepository();
+
+  repo.addParticipant(Participant(name: "Tithya", age: 24, gender: Gender.male));
+
   runApp(const MyApp());
 }
 
