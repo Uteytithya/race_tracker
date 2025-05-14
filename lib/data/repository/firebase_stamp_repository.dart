@@ -8,7 +8,7 @@ class FirebaseStampRepository extends StampRepository {
 
   @override
   Future<void> addStamp(Stamp stamp) async {
-    await _stampRef.push().set(StampDto.toJson(stamp));
+    await _stampRef.child(stamp.id).set(StampDto.toJson(stamp));
   }
 
   @override
@@ -22,9 +22,44 @@ class FirebaseStampRepository extends StampRepository {
     if (!snapshot.exists) return [];
 
     final stampsMap = snapshot.value as Map<Object?, Object?>;
-    return stampsMap.entries.map((entry) {
-      final data = Map<String, dynamic>.from(entry.value as Map);
-      return StampDto.fromJson(data);
-    }).toList();
+
+    final stamps =
+        stampsMap.entries.map((entry) {
+          final data = Map<String, dynamic>.from(entry.value as Map);
+          return StampDto.fromJson(data);
+        }).toList();
+
+    // Safely set the next available ID based on actual highest S-XXX
+    final maxIdNum = stamps.fold<int>(0, (prev, s) {
+      final match = RegExp(r'S-(\d{3})').firstMatch(s.id);
+      if (match != null) {
+        final num = int.tryParse(match.group(1) ?? '0') ?? 0;
+        return num > prev ? num : prev;
+      }
+      return prev;
+    });
+
+    Stamp.setIdCounter(maxIdNum + 1);
+
+    return stamps;
+  }
+
+  @override
+  Future<Stamp?> getStampById(String id) async {
+    final snapshot = await _stampRef.child(id).get();
+    if (!snapshot.exists) return null;
+
+    final data = Map<String, dynamic>.from(snapshot.value as Map);
+    return StampDto.fromJson(data);
+  }
+
+  @override
+  Future<void> updateStamp(Stamp stamp) async {
+    final snapshot = await _stampRef.child(stamp.id).get();
+    if (snapshot.exists) {
+      await _stampRef.child(stamp.id).update(StampDto.toJson(stamp));
+    } else {
+      throw Exception("Stamp not found");
+    }
   }
 }

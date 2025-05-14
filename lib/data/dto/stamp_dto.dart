@@ -3,6 +3,7 @@ import 'package:race_tracker/model/stamp.dart';
 class StampDto {
   static Stamp fromJson(Map<String, dynamic> json) {
     return Stamp(
+      id: json['id'] as String,
       bib: json['bib'] as int,
       segment: json['segment'] as String,
       time: DateTime.parse(json['time'] as String),
@@ -10,6 +11,7 @@ class StampDto {
   }
   static Map<String, dynamic> toJson(Stamp stamp) {
     return {
+      'id': stamp.id,
       'bib': stamp.bib,
       'segment': stamp.segment,
       'time': stamp.time.toIso8601String(),

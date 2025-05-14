@@ -2,12 +2,21 @@ import 'package:race_tracker/model/participant.dart';
 import 'package:race_tracker/utils/enum.dart';
 
 class ParticipantDTO {
-  static Map<String, dynamic> toJson(Participant model) {
+  static Participant fromJson(Map<String, dynamic> json) {
+    return Participant(
+      name: json['name'] as String,
+      gender: genderFromString(json['gender']),
+      age: json['age'] as int,
+      bib: int.tryParse(json['bib'].toString()) ?? 0,
+    );
+  }
+
+  static Map<String, dynamic> toJson(Participant participant) {
     return {
-      'bib': model.bib,
-      'name': model.name,
-      'gender': model.gender.name, // Convert enum to string
-      'age': model.age,
+      'name': participant.name,
+      'gender': participant.gender,
+      'age': participant.age,
+      'bib': participant.bib.toString(),
     };
   }
 
@@ -17,15 +26,6 @@ class ParticipantDTO {
       orElse: () {
         throw Exception("Invalid gender value: $value");
       },
-    );
-  }
-
-  static Participant fromJson(Map<String, dynamic> json) {
-    return Participant(
-      bib: json['bib'],
-      name: json['name'],
-      gender: genderFromString(json['gender']),
-      age: json['age'],
     );
   }
 }
