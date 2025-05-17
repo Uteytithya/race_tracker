@@ -99,7 +99,7 @@ class _ParticipantFormState extends State<ParticipantForm> {
           (p) => p.bib == widget.participant!.bib,
         );
         if (index != -1) {
-          provider.updateParticipant(index, participant);
+          provider.updateParticipant(participant);
         }
       }
 

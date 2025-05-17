@@ -1,4 +1,3 @@
-// bottom_navigation_bar.dart
 import 'package:flutter/material.dart';
 
 class BottomNavBar extends StatelessWidget {
@@ -7,15 +6,15 @@ class BottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
-      color: Color(0xFF2A3182), // More accurate color match to the image
-      height: 56, // Standard height for bottom navigation
+      color: const Color(0xFF2A3182),
+      height: 56,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           IconButton(
             icon: const Icon(Icons.home_outlined),
             onPressed: () {
-              // Handle home navigation
+              Navigator.pushNamed(context, '/');
             },
             color: Colors.white,
           ),
@@ -23,7 +22,7 @@ class BottomNavBar extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.access_time),
             onPressed: () {
-              // Handle clock/history navigation
+              Navigator.pushNamed(context, '/track');
             },
             color: Colors.white,
           ),
@@ -31,7 +30,7 @@ class BottomNavBar extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.menu),
             onPressed: () {
-              // Handle menu navigation
+              Navigator.pushNamed(context, '/race');
             },
             color: Colors.white,
           ),

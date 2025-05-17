@@ -1,4 +1,3 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:race_tracker/data/repository/firebase_stamp_repository.dart';
@@ -6,51 +5,51 @@ import 'package:race_tracker/model/stamp.dart';
 
 class StampProvider extends ChangeNotifier {
   final List<Stamp> _stamps = [];
-
   final Logger logger = Logger();
+  final FirebaseStampRepository _repository = FirebaseStampRepository();
 
   List<Stamp> get stamps => _stamps;
 
-  final FirebaseStampRepository _repository = FirebaseStampRepository();
-
   Future<void> getStamps() async {
-    _stamps.clear();
-    _stamps.addAll(await _repository.getAllStamps());
-    notifyListeners();
+    try {
+      _stamps.clear();
+      _stamps.addAll(await _repository.getAllStamps());
+      notifyListeners();
+    } catch (e) {
+      logger.e("Error fetching stamps: $e");
+    }
   }
 
-  void addStamp(Stamp stamp) {
-    _stamps.add(stamp);
-    _repository.addStamp(stamp);
-    notifyListeners();
+  Future<void> addStamp(Stamp stamp) async {
+    try {
+      await _repository.addStamp(stamp);
+      _stamps.add(stamp);
+      notifyListeners();
+      logger.i("Stamp added: ${stamp.id}");
+    } catch (e) {
+      logger.e("Error adding stamp: $e");
+    }
+  }
+
+  Future<void> addStampToParticipant(Stamp stamp, int bib) async {
+    try {
+      stamp.bib = bib; // Update the stamp with the bib
+      await _repository.addStampToParticipant(stamp, bib);
+      _stamps.removeWhere((s) => s.id == stamp.id); // Remove from local list
+      notifyListeners();
+      logger.i("Stamp added to participant with bib: $bib");
+    } catch (e) {
+      logger.e("Error adding stamp to participant: $e");
+    }
   }
 
   void removeStamp(Stamp stamp) {
-    _stamps.remove(stamp);
-    _repository.deleteStamp(stamp.id);
-    notifyListeners();
-  }
-
-  void clearStamps() {
-    _repository.getAllStamps().then((stamps) {
-      for (var stamp in stamps) {
-        _repository.deleteStamp(stamp.id);
-      }
-      _stamps.clear();
+    try {
+      _stamps.remove(stamp);
+      _repository.deleteStamp(stamp.id);
       notifyListeners();
-    });
-  }
-
-  void updateStamp(String id) {
-    final stamp = _stamps.firstWhere((stamp) => stamp.id == id);
-    if (stamp != null) {
-      _repository.updateStamp(stamp);
-      final index = _stamps.indexOf(stamp);
-      _stamps[index] = stamp;
-      logger.d("Stamp updated in the repository");
-      notifyListeners();
-    } else {
-      logger.e("Stamp not found");
+    } catch (e) {
+      logger.e("Error removing stamp: $e");
     }
   }
 }
