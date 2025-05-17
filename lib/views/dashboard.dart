@@ -6,8 +6,47 @@ import 'package:race_tracker/views/participant/widget/participant_tile.dart';
 import 'package:race_tracker/widget/navbar.dart';
 import '../../provider/participant_provider.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Fetch participants when the dashboard loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchParticipants();
+    });
+  }
+
+  Future<void> _fetchParticipants() async {
+    setState(() {
+      _isLoading = true;
+    });
+    
+    try {
+      // Fetch participants from provider
+      await context.read<ParticipantProvider>().fetchParticipants();
+    } catch (e) {
+      // Handle any errors (could show a snackbar)
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error fetching participants: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,15 +122,29 @@ class DashboardScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-                      IconButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/create');
-                        },
-                        icon: const Icon(
-                          Icons.add_circle,
-                          color: Colors.white,
-                          size: 28,
-                        ),
+                      Row(
+                        children: [
+                          // Refresh button
+                          IconButton(
+                            onPressed: _fetchParticipants,
+                            icon: const Icon(
+                              Icons.refresh,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                          ),
+                          // Add button
+                          IconButton(
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/createParticipant');
+                            },
+                            icon: const Icon(
+                              Icons.add_circle,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -137,83 +190,79 @@ class DashboardScreen extends StatelessWidget {
 
                   // Participant List
                   Expanded(
-                    child: FutureBuilder<List<Participant>>(
-                      future: participants,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        } else if (snapshot.hasError) {
-                          return const Center(
-                            child: Text(
-                              'Error loading participants',
-                              style: TextStyle(color: Colors.white54),
-                            ),
-                          );
-                        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                          return const Center(
-                            child: Text(
-                              'No participants yet',
-                              style: TextStyle(color: Colors.white54),
-                            ),
-                          );
-                        } else {
-                          final participants = snapshot.data!;
-                          return ListView.builder(
-                            itemCount: participants.length,
-                            itemBuilder: (context, index) {
-                              final participant = participants[index];
-
-                              return Dismissible(
-                                key: Key(participant.bib.toString()),
-                                background: Container(
-                                  color: Colors.red,
-                                  alignment: Alignment.centerRight,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                  ),
-                                  child: const Icon(
-                                    Icons.delete,
-                                    color: Colors.white,
+                    child: _isLoading
+                      ? const Center(
+                          child: CircularProgressIndicator(color: Colors.white),
+                        )
+                      : participants.isEmpty
+                        ? RefreshIndicator(
+                            onRefresh: _fetchParticipants,
+                            child: ListView(
+                              children: const [
+                                SizedBox(height: 100),
+                                Center(
+                                  child: Text(
+                                    'No participants yet',
+                                    style: TextStyle(color: Colors.white54),
                                   ),
                                 ),
-                                direction: DismissDirection.endToStart,
-                                onDismissed: (_) {
-                                  final removed = participant;
+                              ],
+                            ),
+                          )
+                        : RefreshIndicator(
+                            onRefresh: _fetchParticipants,
+                            child: ListView.builder(
+                              itemCount: participants.length,
+                              itemBuilder: (context, index) {
+                                final participant = participants[index];
 
-                                  context
-                                      .read<ParticipantProvider>()
-                                      .removeParticipant(removed);
+                                return Dismissible(
+                                  key: Key(participant.bib.toString()),
+                                  background: Container(
+                                    color: Colors.red,
+                                    alignment: Alignment.centerRight,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                    ),
+                                    child: const Icon(
+                                      Icons.delete,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  direction: DismissDirection.endToStart,
+                                  onDismissed: (_) {
+                                    final removed = participant;
 
-                                  showCustomToast(
-                                    context: context,
-                                    message: 'Participant removed',
-                                    onUndo: () {
-                                      context
-                                          .read<ParticipantProvider>()
-                                          .addParticipant(removed);
-                                    },
-                                  );
-                                },
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.pushNamed(
-                                      context,
-                                      '/edit',
-                                      arguments: participant,
+                                    context
+                                        .read<ParticipantProvider>()
+                                        .removeParticipant(removed);
+
+                                    showCustomToast(
+                                      context: context,
+                                      message: 'Participant removed',
+                                      onUndo: () {
+                                        context
+                                            .read<ParticipantProvider>()
+                                            .addParticipant(removed);
+                                      },
                                     );
                                   },
-                                  child: ParticipantTile(
-                                    participant: participant,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.pushNamed(
+                                        context,
+                                        'editParticipant',
+                                        arguments: participant,
+                                      );
+                                    },
+                                    child: ParticipantTile(
+                                      participant: participant,
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
-                          );
-                        }
-                      },
-                    ),
+                                );
+                              },
+                            ),
+                          ),
                   ),
                 ],
               ),

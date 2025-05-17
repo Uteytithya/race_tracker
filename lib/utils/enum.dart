@@ -14,6 +14,11 @@ enum RaceStatus{
   not_started, ongoing, finished
 }
 
+enum ParticipantStatus{
+  // ignore: constant_identifier_names
+  not_started, ongoing, finished
+}
+
 void showCustomToast({
   required BuildContext context,
   required String message,

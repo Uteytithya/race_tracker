@@ -7,6 +7,8 @@ class Participant {
   final int age;
   final Gender gender;
   final List<Stamp> stamps;
+  DateTime? startTime;
+  ParticipantStatus status;
 
   Participant({
     int? bib,
@@ -14,11 +16,15 @@ class Participant {
     required this.age,
     required this.gender,
     List<Stamp>? stamps,
+    ParticipantStatus? status,
+    DateTime? startTime,
   }) : bib = bib ?? generateBib(),
-       stamps = stamps ?? [] {
+       stamps = stamps ?? [],
+       status = status ?? ParticipantStatus.not_started,
+       startTime = startTime ?? DateTime.now() {
     if (name.isEmpty) {
       throw ArgumentError('Name cannot be empty');
-    } 
+    }
     if (age < 0) {
       throw ArgumentError('Age cannot be negative');
     }
