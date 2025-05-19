@@ -8,6 +8,7 @@ class ParticipantDTO {
       name: json['name'] as String,
       gender: genderFromString(json['gender'] as String),
       age: json['age'] as int,
+      // Convert bib from String to int
       bib: int.tryParse(json['bib'].toString()) ?? 0,
       status: ParticipantStatus.values.firstWhere(
         (e) => e.name == json['status'],
@@ -30,6 +31,7 @@ class ParticipantDTO {
       'name': participant.name,
       'gender': participant.gender.name,
       'age': participant.age,
+      // Convert bib from int to String
       'bib': participant.bib.toString(),
       'status': participant.status.name,
       'start_time': participant.startTime?.toIso8601String(),

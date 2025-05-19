@@ -17,7 +17,6 @@ import 'package:race_tracker/views/participant/edit_participant.dart';
 
 import 'package:race_tracker/views/result/race_screen.dart';
 import 'package:race_tracker/views/result/result_screen.dart';
-import 'package:race_tracker/views/track/stamp_screen.dart';
 import 'package:race_tracker/views/track/track_screen.dart';
 
 void main() async {
@@ -50,11 +49,9 @@ class MyApp extends StatelessWidget {
           '/': (context) => const DashboardScreen(),
           '/createParticipant': (context) => const CreateParticipantScreen(),
           '/editParticipant': (context) => const EditParticipantScreen(),
-          '/stamp': (context) => const StampScreen(),
           '/track': (context) => const TrackScreen(),
           '/race': (context) => const RaceScreen(),
           '/result': (context) => const ResultScreen(),
-
         },
         onUnknownRoute:
             (settings) =>

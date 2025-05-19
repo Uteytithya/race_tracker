@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:race_tracker/data/repository/firebase_stamp_repository.dart';
 import 'package:race_tracker/model/stamp.dart';
+import 'package:race_tracker/provider/participant_provider.dart';
 
 class StampProvider extends ChangeNotifier {
   final List<Stamp> _stamps = [];
@@ -35,7 +36,24 @@ class StampProvider extends ChangeNotifier {
     try {
       stamp.bib = bib; // Update the stamp with the bib
       await _repository.addStampToParticipant(stamp, bib);
-      _stamps.removeWhere((s) => s.id == stamp.id); // Remove from local list
+
+      // Debug: Log the stamps before adding
+      final participant = ParticipantProvider().participants.firstWhere(
+        (p) => p.bib == bib,
+      );
+
+      if (participant == null) {
+        throw Exception("Participant with bib $bib not found");
+      }
+
+      logger.i("Stamps before adding: ${participant.stamps}");
+
+      // Add the stamp to the local participant's stamps list
+      participant.stamps.add(stamp);
+
+      // Debug: Log the stamps after adding
+      logger.i("Stamps after adding: ${participant.stamps}");
+
       notifyListeners();
       logger.i("Stamp added to participant with bib: $bib");
     } catch (e) {
@@ -43,13 +61,18 @@ class StampProvider extends ChangeNotifier {
     }
   }
 
-  void removeStamp(Stamp stamp) {
+  Future<void> removeStampFromParticipant(Stamp stamp, int bib) async {
+    logger.i("Stamp removed for BIB #$bib: ${stamp.id}");
+    ParticipantProvider participantProvider = ParticipantProvider();
     try {
-      _stamps.remove(stamp);
-      _repository.deleteStamp(stamp.id);
+      await _repository.removeStampFromParticipant(stamp, bib);
+      participantProvider.participants
+          .firstWhere((p) => p.bib == bib)
+          .stamps
+          .removeWhere((s) => s.id == stamp.id);
       notifyListeners();
     } catch (e) {
-      logger.e("Error removing stamp: $e");
+      logger.e("Error removing stamp for BIB #$bib: $e");
     }
   }
 }

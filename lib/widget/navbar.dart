@@ -20,17 +20,17 @@ class BottomNavBar extends StatelessWidget {
           ),
           const SizedBox(width: 40),
           IconButton(
-            icon: const Icon(Icons.access_time),
+            icon: const Icon(Icons.flag),
             onPressed: () {
-              Navigator.pushNamed(context, '/track');
+              Navigator.pushNamed(context, '/race');
             },
             color: Colors.white,
           ),
           const SizedBox(width: 40),
           IconButton(
-            icon: const Icon(Icons.menu),
+            icon: const Icon(Icons.access_time),
             onPressed: () {
-              Navigator.pushNamed(context, '/race');
+              Navigator.pushNamed(context, '/track');
             },
             color: Colors.white,
           ),

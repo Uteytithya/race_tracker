@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:race_tracker/model/participant.dart';
 import 'package:race_tracker/provider/participant_provider.dart';
 import 'package:race_tracker/provider/race_provider.dart';
-import 'package:race_tracker/utils/enum.dart';
 import 'package:race_tracker/utils/time_calculator.dart';
 import 'package:race_tracker/widget/navbar.dart';
 
@@ -15,11 +14,12 @@ class ResultScreen extends StatefulWidget {
 }
 
 class _ResultScreenState extends State<ResultScreen> {
-  int _activeTab = 1;
-  String _selectedSegment = 'Overall';
-  bool _isLoading = true;
+  // Constants
+  static const List<String> _segments = ['Overall', 'Swim', 'Cycle', 'Run'];
   
-  final List<String> _segments = ['Overall', 'Swim', 'Cycle', 'Run'];
+  // State
+  bool _isLoading = true;
+  String _selectedSegment = 'Overall';
 
   @override
   void initState() {
@@ -28,10 +28,11 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   Future<void> _fetchData() async {
-    setState(() => _isLoading = true);
+    if (!mounted) return;
     
+    setState(() => _isLoading = true);
+
     try {
-      // Fetch both data sources in parallel
       await Future.wait([
         context.read<ParticipantProvider>().fetchParticipants(),
         context.read<RaceProvider>().fetchRaceData(),
@@ -55,32 +56,13 @@ class _ResultScreenState extends State<ResultScreen> {
         onRefresh: _fetchData,
         child: Stack(
           children: [
-            // Background with image and overlay
-            Container(
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/Header_bg.jpg'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              child: Container(color: Colors.black.withOpacity(0.2)),
-            ),
+            // Background
+            _buildBackground(),
             
-            // Header with title
-            const Positioned(
-              top: 80,
-              left: 20,
-              child: Text(
-                'Race Results',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
+            // Header
+            _buildHeader(),
             
-            // Main content area
+            // Main content
             Positioned(
               top: 150,
               left: 0,
@@ -93,10 +75,10 @@ class _ResultScreenState extends State<ResultScreen> {
                 ),
                 child: Column(
                   children: [
-                    // Tab navigation
+                    // Navigation tabs
                     _buildTabBar(),
                     
-                    // Race timer display
+                    // Race timer
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Text(
@@ -109,8 +91,8 @@ class _ResultScreenState extends State<ResultScreen> {
                       ),
                     ),
                     
-                    // Segment selector and results
-                    _isLoading 
+                    // Results
+                    _isLoading
                         ? const Expanded(
                             child: Center(
                               child: CircularProgressIndicator(color: Colors.white),
@@ -130,6 +112,33 @@ class _ResultScreenState extends State<ResultScreen> {
     );
   }
 
+  Widget _buildBackground() {
+    return Container(
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/Header_bg.jpg'),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: Container(color: Colors.black.withOpacity(0.2)),
+    );
+  }
+
+  Widget _buildHeader() {
+    return const Positioned(
+      top: 80,
+      left: 20,
+      child: Text(
+        'Race Results',
+        style: TextStyle(
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
   Widget _buildTabBar() {
     return Container(
       margin: const EdgeInsets.all(16),
@@ -139,13 +148,14 @@ class _ResultScreenState extends State<ResultScreen> {
       ),
       child: Row(
         children: [
+          // Status tab
           Expanded(
             child: GestureDetector(
               onTap: () => Navigator.pushNamed(context, '/race'),
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color: _activeTab == 0 ? const Color(0xFF4758E0) : Colors.white,
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: const Center(
@@ -160,6 +170,8 @@ class _ResultScreenState extends State<ResultScreen> {
               ),
             ),
           ),
+          
+          // Results tab (active)
           Expanded(
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 12),
@@ -186,37 +198,43 @@ class _ResultScreenState extends State<ResultScreen> {
   Widget _buildResults(List<Participant> participants) {
     return Column(
       children: [
-        // Segment selector
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                _selectedSegment == 'Overall' ? 'Overall Ranking' : '$_selectedSegment Ranking',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              _buildSegmentDropdown(),
-            ],
-          ),
-        ),
+        // Segment selector header
+        _buildSegmentHeader(),
         
-        // Display results or empty state
+        // Participant list
         Expanded(
-          child: participants.isEmpty 
+          child: participants.isEmpty
               ? const Center(
                   child: Text(
                     'No participants found',
                     style: TextStyle(color: Colors.white70),
                   ),
                 )
-              : _buildRankings(participants),
+              : _buildParticipantList(participants),
         ),
       ],
+    );
+  }
+
+  Widget _buildSegmentHeader() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            _selectedSegment == 'Overall'
+                ? 'Overall Results'
+                : '$_selectedSegment Results',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          _buildSegmentDropdown(),
+        ],
+      ),
     );
   }
 
@@ -239,24 +257,25 @@ class _ResultScreenState extends State<ResultScreen> {
             setState(() => _selectedSegment = value);
           }
         },
-        items: _segments.map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(
-              value,
-              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+        items: _segments.map((value) => DropdownMenuItem<String>(
+          value: value,
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
             ),
-          );
-        }).toList(),
+          ),
+        )).toList(),
       ),
     );
   }
 
-  Widget _buildRankings(List<Participant> allParticipants) {
-    // Get valid participants for current segment
-    final rankedParticipants = _getFilteredParticipants(allParticipants);
-    
-    if (rankedParticipants.isEmpty) {
+  Widget _buildParticipantList(List<Participant> allParticipants) {
+    // Get filtered & sorted participants for current segment
+    final filteredParticipants = _getFilteredParticipants(allParticipants);
+
+    if (filteredParticipants.isEmpty) {
       return const Center(
         child: Text(
           'No results available for this segment',
@@ -265,198 +284,87 @@ class _ResultScreenState extends State<ResultScreen> {
       );
     }
 
-    // Split into podium (top 3) and remaining participants
-    final podiumParticipants = rankedParticipants.length > 3 
-        ? rankedParticipants.sublist(0, 3) 
-        : rankedParticipants;
-        
-    final remainingParticipants = rankedParticipants.length > 3 
-        ? rankedParticipants.sublist(3) 
-        : <Participant>[];
+    return ListView.builder(
+      itemCount: filteredParticipants.length,
+      padding: const EdgeInsets.only(bottom: 16),
+      itemBuilder: (context, index) {
+        final participant = filteredParticipants[index];
+        final position = index + 1;
 
-    return Column(
-      children: [
-        // Podium display
-        SizedBox(
-          height: 170,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              if (podiumParticipants.length >= 2)
-                _buildPodiumPosition(podiumParticipants[1], 2, Colors.white, 90, 140),
-              const SizedBox(width: 6),
-              if (podiumParticipants.isNotEmpty)
-                _buildPodiumPosition(podiumParticipants[0], 1, Colors.white, 100, 170),
-              const SizedBox(width: 6),
-              if (podiumParticipants.length >= 3)
-                _buildPodiumPosition(podiumParticipants[2], 3, Colors.white, 80, 110),
-            ],
-          ),
-        ),
-        
-        const SizedBox(height: 16),
-        
-        // Remaining participants list
-        Expanded(
-          child: remainingParticipants.isEmpty
-              ? const Center(
-                  child: Text(
-                    'No additional participants',
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                )
-              : ListView.builder(
-                  itemCount: remainingParticipants.length,
-                  padding: const EdgeInsets.only(bottom: 16),
-                  itemBuilder: (context, index) {
-                    final participant = remainingParticipants[index];
-                    final position = index + 4;
-                    
-                    return Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: const Color(0xFF4758E0),
-                          child: Text(
-                            '$position',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        title: Text(
-                          participant.name,
-                          style: const TextStyle(
-                            color: Color(0xFF4758E0),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        trailing: Text(
-                          _getParticipantTime(participant),
-                          style: const TextStyle(
-                            color: Color(0xFF4758E0),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-        ),
-      ],
+        return _buildParticipantTile(participant, position);
+      },
     );
   }
 
-  Widget _buildPodiumPosition(Participant participant, int position, Color color, double width, double height) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        SizedBox(
-          width: width,
+  Widget _buildParticipantTile(Participant participant, int position) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: const Color(0xFF4758E0),
           child: Text(
-            participant.name,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500, fontSize: 12),
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
+            '$position',
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
-        const SizedBox(height: 4),
-        Container(
-          width: width,
-          height: height,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                '$position', 
-                style: const TextStyle(
-                  color: Color(0xFF4758E0), 
-                  fontWeight: FontWeight.bold, 
-                  fontSize: 28
-                )
-              ),
-              const SizedBox(height: 4),
-              Text(
-                _getParticipantTime(participant), 
-                style: const TextStyle(
-                  color: Color(0xFF4758E0), 
-                  fontWeight: FontWeight.w500, 
-                  fontSize: 14
-                )
-              ),
-            ],
+        title: Text(
+          participant.name,
+          style: const TextStyle(
+            color: Color(0xFF4758E0),
+            fontWeight: FontWeight.bold,
           ),
         ),
-      ],
+        subtitle: Text(
+          "Bib: ${participant.bib}",
+          style: const TextStyle(color: Colors.black54),
+        ),
+        trailing: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              _getParticipantTime(participant),
+              style: const TextStyle(
+                color: Color(0xFF4758E0),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              _selectedSegment,
+              style: const TextStyle(color: Colors.black54, fontSize: 12),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
-  // Simplified filtering and sorting for participants
   List<Participant> _getFilteredParticipants(List<Participant> participants) {
     try {
-      // Filter participants with valid data for this segment
+      // Filter valid participants for this segment
       final validParticipants = participants.where((p) {
         // Must have start time
         if (p.startTime == null) return false;
-        
-        // For overall ranking, need at least one stamp
+
+        // Segment-specific filtering
         if (_selectedSegment == 'Overall') {
           return p.stamps.isNotEmpty;
+        } else {
+          return p.stamps.any((s) => 
+            s.segment.toLowerCase() == _selectedSegment.toLowerCase());
         }
-        
-        // For specific segments, need a stamp matching the segment
-        return p.stamps.any((s) => 
-          s.segment.toLowerCase() == _selectedSegment.toLowerCase());
       }).toList();
-      
-      // Sort participants
-      if (_selectedSegment == 'Overall') {
-        // Sort by total time for overall ranking
-        validParticipants.sort((a, b) {
-          final aTimeMap = TimeCalculator.calculateTimes(
-            raceStart: a.startTime!, 
-            stamps: a.stamps
-          );
-          
-          final bTimeMap = TimeCalculator.calculateTimes(
-            raceStart: b.startTime!, 
-            stamps: b.stamps
-          );
-          
-          final aTimeStr = aTimeMap['totalTime'];
-          final bTimeStr = bTimeMap['totalTime'];
-          
-          return _compareTimeStrings(aTimeStr, bTimeStr);
-        });
-      } else {
-        // Sort by segment time
-        validParticipants.sort((a, b) {
-          // Get stamps for this segment
-          final aStamps = a.stamps.where((s) => 
-            s.segment.toLowerCase() == _selectedSegment.toLowerCase()).toList();
-            
-          final bStamps = b.stamps.where((s) => 
-            s.segment.toLowerCase() == _selectedSegment.toLowerCase()).toList();
-          
-          // Handle cases with missing stamps
-          if (aStamps.isEmpty && bStamps.isEmpty) return 0;
-          if (aStamps.isEmpty) return 1;
-          if (bStamps.isEmpty) return -1;
-          
-          // Compare by segment completion time
-          return aStamps.first.time.compareTo(bStamps.first.time);
-        });
-      }
+
+      // Sort the participants
+      _sortParticipantsByTime(validParticipants);
       
       return validParticipants;
     } catch (e) {
@@ -465,7 +373,37 @@ class _ResultScreenState extends State<ResultScreen> {
     }
   }
 
-  // Compare time strings in format "HH:MM:SS.MS"
+  void _sortParticipantsByTime(List<Participant> participants) {
+    if (_selectedSegment == 'Overall') {
+      // Sort by total race time
+      participants.sort((a, b) {
+        final aTimeMap = TimeCalculator.calculateTimes(
+          raceStart: a.startTime!,
+          stamps: a.stamps,
+        );
+        final bTimeMap = TimeCalculator.calculateTimes(
+          raceStart: b.startTime!,
+          stamps: b.stamps,
+        );
+        return _compareTimeStrings(aTimeMap['totalTime'], bTimeMap['totalTime']);
+      });
+    } else {
+      // Sort by segment completion time
+      participants.sort((a, b) {
+        final aStamps = a.stamps.where((s) => 
+          s.segment.toLowerCase() == _selectedSegment.toLowerCase()).toList();
+        final bStamps = b.stamps.where((s) => 
+          s.segment.toLowerCase() == _selectedSegment.toLowerCase()).toList();
+        
+        if (aStamps.isEmpty && bStamps.isEmpty) return 0;
+        if (aStamps.isEmpty) return 1;
+        if (bStamps.isEmpty) return -1;
+        
+        return aStamps.first.time.compareTo(bStamps.first.time);
+      });
+    }
+  }
+
   int _compareTimeStrings(String timeA, String timeB) {
     try {
       final partsA = timeA.split(':');
@@ -481,10 +419,9 @@ class _ResultScreenState extends State<ResultScreen> {
       final minutesB = int.tryParse(partsB[1]) ?? 0;
       if (minutesA != minutesB) return minutesA.compareTo(minutesB);
       
-      // Compare seconds and milliseconds
+      // Compare seconds
       final secPartsA = partsA[2].split('.');
       final secPartsB = partsB[2].split('.');
-      
       final secondsA = int.tryParse(secPartsA[0]) ?? 0;
       final secondsB = int.tryParse(secPartsB[0]) ?? 0;
       if (secondsA != secondsB) return secondsA.compareTo(secondsB);
@@ -503,7 +440,6 @@ class _ResultScreenState extends State<ResultScreen> {
     }
   }
 
-  // Get formatted time for a participant based on selected segment
   String _getParticipantTime(Participant participant) {
     try {
       if (_selectedSegment == 'Overall') {
@@ -516,11 +452,10 @@ class _ResultScreenState extends State<ResultScreen> {
           s.segment.toLowerCase() == _selectedSegment.toLowerCase()).toList();
         
         if (segmentStamps.isNotEmpty) {
-          final segmentTime = TimeCalculator.calculateSegmentTime(
+          return TimeCalculator.calculateSegmentTime(
             participant.startTime!,
             segmentStamps.first.time,
           );
-          return segmentTime;
         }
         return "N/A";
       }
@@ -531,15 +466,17 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 }
 
-// Add this method to your TimeCalculator class if it doesn't exist yet
+// Extension method for TimeCalculator
 extension TimeCalculatorExtension on TimeCalculator {
   static String calculateSegmentTime(DateTime start, DateTime end) {
     final duration = end.difference(start);
     final hours = duration.inHours.toString().padLeft(2, '0');
     final minutes = (duration.inMinutes % 60).toString().padLeft(2, '0');
     final seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
-    final milliseconds = ((duration.inMilliseconds % 1000) ~/ 10).toString().padLeft(2, '0');
-    
+    final milliseconds = ((duration.inMilliseconds % 1000) ~/ 10)
+        .toString()
+        .padLeft(2, '0');
+
     return '$hours:$minutes:$seconds.$milliseconds';
   }
 }
