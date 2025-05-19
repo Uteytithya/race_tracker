@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:race_tracker/data/repository/firebase_stamp_repository.dart';
+import 'package:race_tracker/data/repository/stamp/firebase_stamp_repository.dart';
+import 'package:race_tracker/model/participant.dart';
 import 'package:race_tracker/model/stamp.dart';
 import 'package:race_tracker/provider/participant_provider.dart';
 
@@ -8,6 +9,7 @@ class StampProvider extends ChangeNotifier {
   final List<Stamp> _stamps = [];
   final Logger logger = Logger();
   final FirebaseStampRepository _repository = FirebaseStampRepository();
+  final ParticipantProvider _participantProvider = ParticipantProvider();
 
   List<Stamp> get stamps => _stamps;
 
@@ -33,23 +35,29 @@ class StampProvider extends ChangeNotifier {
   }
 
   Future<void> addStampToParticipant(Stamp stamp, int bib) async {
+    logger.i(stamp);
     try {
       stamp.bib = bib; // Update the stamp with the bib
-      await _repository.addStampToParticipant(stamp, bib);
 
-      // Debug: Log the stamps before adding
-      final participant = ParticipantProvider().participants.firstWhere(
-        (p) => p.bib == bib,
-      );
+      final Participant? participant = await _participantProvider.getByBib(bib);
 
       if (participant == null) {
-        throw Exception("Participant with bib $bib not found");
+        logger.e("Participant with bib $bib not found");
+        return;
+      } else {
+        logger.i(participant.stamps);
       }
 
-      logger.i("Stamps before adding: ${participant.stamps}");
+      if (stamp.segment == participant.stamps.firstWhere(
+            (s) => s.segment == stamp.segment
+          )) {
+        logger.i("Stamp already exists for BIB #$bib");
+        return;
+      }
 
-      // Add the stamp to the local participant's stamps list
-      participant.stamps.add(stamp);
+      await _repository.addStampToParticipant(stamp, bib);
+
+      logger.i("Stamps before adding: ${participant.stamps}");
 
       // Debug: Log the stamps after adding
       logger.i("Stamps after adding: ${participant.stamps}");

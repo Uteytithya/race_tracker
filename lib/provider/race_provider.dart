@@ -9,26 +9,22 @@ import 'package:race_tracker/utils/enum.dart';
 
 class RaceProvider with ChangeNotifier {
   final DatabaseReference _dbRef = FirebaseDatabase.instance.ref();
+  final Logger logger = Logger();
 
   bool _isRaceActive = false;
   DateTime? _raceStartTime;
   DateTime? _raceEndTime;
-  List<Participant> _participants = [];
-  List<String> _segments = [];
   String _elapsedTime = "00:00:00";
   Timer? _timer;
-  final logger = Logger();
-  int? _elapsedSeconds;
-
-  bool get isRaceActive => _isRaceActive;
-  DateTime? get raceStartTime => _raceStartTime;
-  DateTime? get raceEndTime => _raceEndTime;
+  List<Participant> _participants = [];
   List<Participant> get participants => _participants;
-  List<String> get segments => _segments;
-
   int get participantsLeft =>
       _participants.where((p) => p.stamps.isEmpty).length;
+
+  bool get isRaceActive => _isRaceActive;
   String get elapsedTime => _elapsedTime;
+
+  bool get isTimerReset => _elapsedTime == "00:00:00";
 
   Future<void> fetchRaceData() async {
     try {
@@ -45,12 +41,15 @@ class RaceProvider with ChangeNotifier {
         _participants =
             participantsData.entries.map((entry) {
               final participantData = Map<String, dynamic>.from(entry.value);
+
               return Participant(
                 bib:
                     int.tryParse(entry.key) ??
                     0, // Convert bib from String to int
-                name: participantData['name'],
-                age: participantData['age'],
+                name:
+                    participantData['name'] ??
+                    'Unknown', // Default to 'Unknown'
+                age: participantData['age'] ?? 0, // Default to 0
                 gender:
                     participantData['gender'] == 'Male'
                         ? Gender.male
@@ -60,11 +59,19 @@ class RaceProvider with ChangeNotifier {
                         ? (participantData['stamps'] as Map).values.map((
                           stamp,
                         ) {
+                          final stampData = Map<String, dynamic>.from(stamp);
                           return Stamp(
-                            id: stamp['id'],
-                            bib: int.tryParse(stamp['bib'].toString()) ?? 0,
-                            segment: stamp['segment'],
-                            time: DateTime.parse(stamp['time']),
+                            id:
+                                stampData['id'] ??
+                                '', // Default to empty string
+                            bib: int.tryParse(stampData['bib'].toString()) ?? 0,
+                            segment:
+                                stampData['segment'] ??
+                                'Unknown', // Default to 'Unknown'
+                            time:
+                                stampData['time'] != null
+                                    ? DateTime.parse(stampData['time'])
+                                    : DateTime.now(), // Default to current time
                           );
                         }).toList()
                         : [],
@@ -82,12 +89,12 @@ class RaceProvider with ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      debugPrint("Error fetching race data: $e");
+      logger.e("Error fetching participants: $e");
     }
   }
 
   void _startTimer() {
-    debugPrint("Starting race timer");
+    logger.i("Starting race timer");
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (_raceStartTime != null) {
@@ -103,6 +110,7 @@ class RaceProvider with ChangeNotifier {
   }
 
   Future<void> startRace() async {
+    _raceStartTime ??= DateTime.now();
     if (!_isRaceActive) {
       _isRaceActive = true;
       _raceStartTime = DateTime.now();
@@ -168,6 +176,7 @@ class RaceProvider with ChangeNotifier {
             participant.status = ParticipantStatus.finished;
             await _dbRef.child('participants/${participant.bib}').update({
               'status': 'finished',
+              'finish_time': _raceEndTime!.toIso8601String(),
             });
           }
         }
@@ -221,7 +230,6 @@ class RaceProvider with ChangeNotifier {
     _raceStartTime = null;
     _raceEndTime = null;
     _elapsedTime = "00:00:00";
-    _elapsedSeconds = null;
 
     await _dbRef.child('raceStatus').set({
       'status': 'not_started',
@@ -236,6 +244,8 @@ class RaceProvider with ChangeNotifier {
       await _dbRef.child('participants/${participant.bib}').update({
         'status': 'not_started',
         'start_time': null,
+        'finish_time': null,
+        'stamps': [],
       });
     }
     notifyListeners();

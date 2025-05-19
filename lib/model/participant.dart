@@ -1,5 +1,6 @@
 import 'package:race_tracker/model/stamp.dart';
 import 'package:race_tracker/utils/enum.dart';
+import 'package:race_tracker/utils/time_calculator.dart';
 
 class Participant {
   final int bib;
@@ -51,5 +52,34 @@ class Participant {
 
   static void incrementBibCounter() {
     _bibCounter++;
+  }
+
+  String getParticipantTime(Participant participant, String selectedSegment) {
+    try {
+      if (selectedSegment == 'Overall') {
+        return TimeCalculator.calculateTimes(
+          raceStart: participant.startTime!,
+          stamps: participant.stamps,
+        )['totalTime'];
+      } else {
+        final segmentStamps =
+            participant.stamps
+                .where(
+                  (s) =>
+                      s.segment.toLowerCase() == selectedSegment.toLowerCase(),
+                )
+                .toList();
+
+        if (segmentStamps.isNotEmpty) {
+          return TimeCalculator.calculateSegmentTime(
+            participant.startTime!,
+            segmentStamps.first.time,
+          );
+        }
+        return "N/A";
+      }
+    } catch (e) {
+      throw Exception('Error getting time for ${participant.name}: $e');
+    }
   }
 }

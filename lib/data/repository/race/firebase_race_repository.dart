@@ -1,6 +1,6 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:race_tracker/data/dto/race_dto.dart';
-import 'package:race_tracker/data/repository/race_repository.dart';
+import 'package:race_tracker/data/repository/race/race_repository.dart';
 import 'package:race_tracker/model/race.dart';
 
 class FirebaseRaceRepository extends RaceRepository {

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-class CustomToast extends StatefulWidget {
+class AppCustomToast extends StatefulWidget {
   final String message;
   final VoidCallback onUndo;
   final VoidCallback onClose;
 
-  const CustomToast({
+  const AppCustomToast({
     super.key,
     required this.message,
     required this.onUndo,
@@ -13,10 +13,10 @@ class CustomToast extends StatefulWidget {
   });
 
   @override
-  State<CustomToast> createState() => _CustomToastState();
+  State<AppCustomToast> createState() => _AppCustomToastState();
 }
 
-class _CustomToastState extends State<CustomToast> with SingleTickerProviderStateMixin {
+class _AppCustomToastState extends State<AppCustomToast> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 

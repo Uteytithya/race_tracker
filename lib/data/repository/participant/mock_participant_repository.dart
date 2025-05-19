@@ -1,7 +1,7 @@
 
 import 'package:race_tracker/data/mock_data/mock_data.dart';
 
-import '../../model/participant.dart';
+import '../../../model/participant.dart';
 
 
 class ParticipantRepository {

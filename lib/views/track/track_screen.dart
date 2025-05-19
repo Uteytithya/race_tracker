@@ -7,9 +7,17 @@ import 'package:race_tracker/provider/participant_provider.dart';
 import 'package:race_tracker/provider/race_provider.dart';
 import 'package:race_tracker/provider/stamp_provider.dart';
 import 'package:race_tracker/utils/enum.dart';
+import 'package:race_tracker/views/track/widget/track_content.dart';
+import 'package:race_tracker/views/track/widget/track_grid_content.dart';
+import 'package:race_tracker/views/track/widget/track_segment_tab.dart';
+import 'package:race_tracker/views/track/widget/track_timer.dart';
+import 'package:race_tracker/widget/app_background.dart';
 import 'dart:async';
 
-import 'package:race_tracker/widget/navbar.dart';
+import 'package:race_tracker/widget/app_bottom_navbar.dart';
+import 'package:race_tracker/widget/app_content.dart';
+import 'package:race_tracker/widget/app_header.dart';
+import 'package:race_tracker/widget/app_overlay.dart';
 
 class TrackScreen extends StatefulWidget {
   const TrackScreen({super.key});
@@ -25,7 +33,6 @@ class _TrackScreenState extends State<TrackScreen>
 
   // Animation controller for card press
   late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
 
   // Currently animating BIB
   int? _animatingBib;
@@ -41,10 +48,6 @@ class _TrackScreenState extends State<TrackScreen>
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
-    );
-
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.9).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
 
     // Load participants
@@ -125,17 +128,25 @@ class _TrackScreenState extends State<TrackScreen>
       time: DateTime.now(),
       bib: bib,
     );
-    await stampProvider.addStampToParticipant(
-      stamp,
-      bib,
-    ); // Convert bib to String
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("$_selectedSegment stamp recorded for BIB #$bib"),
-        duration: const Duration(seconds: 1),
-        backgroundColor: Colors.green,
-      ),
-    );
+    try {
+      await stampProvider.addStampToParticipant(stamp, bib);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("$_selectedSegment stamp recorded for BIB #$bib"),
+          duration: const Duration(seconds: 1),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      debugPrint("Error adding stamp: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Failed to add stamp for BIB #$bib"),
+          duration: const Duration(seconds: 1),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _handleRemoveStampForBib(Stamp stamp, int bib) async {
@@ -162,10 +173,6 @@ class _TrackScreenState extends State<TrackScreen>
       stampToRemove = participant.stamps.firstWhere(
         (s) => s.segment.toLowerCase() == _selectedSegment.toLowerCase(),
       );
-
-      if (stampToRemove == null) {
-        throw Exception("No matching stamp found");
-      }
     } catch (_) {
       Logger().i("No $_selectedSegment stamp found for BIB #$bib");
       ScaffoldMessenger.of(context).showSnackBar(
@@ -219,329 +226,47 @@ class _TrackScreenState extends State<TrackScreen>
 
   @override
   Widget build(BuildContext context) {
-    final participants = context.watch<ParticipantProvider>().participants;
-    final raceProvider =
-        context.watch<RaceProvider>(); // Get race provider for timer
+    final participantProvider = context.watch<ParticipantProvider>();
+    final raceProvider = context.watch<RaceProvider>();
 
     return Scaffold(
       body: Stack(
         children: [
           // Background
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/Header_bg.jpg'),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
+          AppBackground(),
 
           // Overlay
-          Container(color: Colors.black.withOpacity(0.2)),
+          AppOverlay(),
 
           // Header
-          Column(
-            children: [
-              const SizedBox(height: 80),
-              Row(
-                children: [
-                  Container(
-                    width: 300,
-                    margin: const EdgeInsets.only(left: 20),
-                    child: const Text(
-                      'Tracker',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+          AppHeader(title: 'Tracker'),
 
           // Main Content
-          Positioned(
-            top: 150,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFF4758E0),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-              ),
-              child: Column(
-                children: [
-                  // Navigation bar with tabs
-                  Container(
-                    margin: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(30),
+          AppContent(
+            content:
+                _isLoading
+                    ? const Center(
+                      child: CircularProgressIndicator(color: Colors.white),
+                    )
+                    : TrackContent(
+                      raceProvider: raceProvider,
+                      participants: participantProvider.participants,
+                      handleAddStampForBib: _handleAddStampForBib,
+                      handleRemoveStampForBib: _handleRemoveStampForBib,
+                      fetchData: _fetchData,
+                      selectedSegment: _selectedSegment,
+                      onSegmentSelected: (segment) {
+                        setState(() {
+                          _selectedSegment = segment;
+                        });
+                      },
+                      animatingBib: _animatingBib,
+                      isRaceActive: raceProvider.isRaceActive,
                     ),
-                    child: Row(
-                      children: [
-                        // Tracker tab (active)
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF4758E0),
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                'Tracker',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Timer display - using global timer from RaceProvider
-                  Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          "Race Time: ",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        Text(
-                          raceProvider.elapsedTime,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        // Status indicator
-                        Container(
-                          width: 12,
-                          height: 12,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color:
-                                raceProvider.isRaceActive
-                                    ? Colors.green
-                                    : Colors.red,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Segment Sub-Tabs
-                  _buildSegmentTabs(),
-
-                  // BIB Grid Content
-                  Expanded(
-                    child:
-                        _isLoading
-                            ? const Center(
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                              ),
-                            )
-                            : participants.isEmpty
-                            ? Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Text(
-                                    'No participants found',
-                                    style: TextStyle(color: Colors.white70),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  ElevatedButton(
-                                    onPressed: _fetchData,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.white,
-                                      foregroundColor: const Color(0xFF4758E0),
-                                    ),
-                                    child: const Text('Refresh'),
-                                  ),
-                                ],
-                              ),
-                            )
-                            : _buildBibGrid(participants),
-                  ),
-                ],
-              ),
-            ),
           ),
         ],
       ),
-      bottomNavigationBar: const BottomNavBar(),
+      bottomNavigationBar: const AppBottomNavbar(),
     );
-  }
-
-  Widget _buildSegmentTabs() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(25),
-      ),
-      child: Row(
-        children: [
-          for (final segment in ['Run', 'Cycle', 'Swim'])
-            Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedSegment = segment;
-                  });
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  decoration: BoxDecoration(
-                    color:
-                        _selectedSegment == segment
-                            ? Colors.white
-                            : Colors.transparent,
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  child: Center(
-                    child: Text(
-                      segment,
-                      style: TextStyle(
-                        color:
-                            _selectedSegment == segment
-                                ? const Color(0xFF4758E0)
-                                : Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBibGrid(List<Participant> participants) {
-    // Get active participants (not finished)
-    final activeParticipants =
-        participants
-            .where((p) => p.status != ParticipantStatus.finished)
-            .toList();
-
-    if (activeParticipants.isEmpty) {
-      return const Center(
-        child: Text(
-          'No active participants to track',
-          style: TextStyle(color: Colors.white70),
-        ),
-      );
-    }
-
-    return RefreshIndicator(
-      onRefresh: _fetchData,
-      child: GridView.builder(
-        padding: const EdgeInsets.all(16),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          childAspectRatio: 1,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-        ),
-        itemCount: activeParticipants.length,
-        itemBuilder: (context, index) {
-          final participant = activeParticipants[index];
-          final bool isAnimating = _animatingBib == participant.bib;
-
-          // Inside _buildBibGrid
-          return GestureDetector(
-            onTap: () => _handleAddStampForBib(participant.bib),
-            onLongPress:
-                () => _handleRemoveStampForBib(
-                  participant.stamps.firstWhere(
-                    (s) =>
-                        s.segment.toLowerCase() ==
-                        _selectedSegment.toLowerCase(),
-                  ),
-                  participant.bib,
-                ),
-            child: AnimatedScale(
-              scale: isAnimating ? 0.9 : 1.0,
-              duration: const Duration(milliseconds: 100),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 5,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      '${participant.bib}',
-                      style: const TextStyle(
-                        color: Color(0xFF4758E0),
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      participant.name,
-                      textAlign: TextAlign.center,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Color(0xFF4758E0),
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Icon(
-                      _getIconForSegment(_selectedSegment),
-                      color: const Color(0xFF4758E0),
-                      size: 16,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  IconData _getIconForSegment(String segment) {
-    switch (segment.toLowerCase()) {
-      case 'run':
-        return Icons.directions_run;
-      case 'cycle':
-        return Icons.directions_bike;
-      case 'swim':
-        return Icons.pool;
-      default:
-        return Icons.timer;
-    }
   }
 }
