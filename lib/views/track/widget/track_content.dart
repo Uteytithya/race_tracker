@@ -4,7 +4,6 @@ import 'package:race_tracker/model/stamp.dart';
 import 'package:race_tracker/provider/race_provider.dart';
 import 'package:race_tracker/views/track/widget/track_grid_content.dart';
 import 'package:race_tracker/views/track/widget/track_segment_tab.dart';
-import 'package:race_tracker/views/track/widget/track_timer.dart';
 
 class TrackContent extends StatelessWidget {
   const TrackContent({

@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:race_tracker/model/participant.dart';
 import 'package:race_tracker/provider/participant_provider.dart';
 import 'package:race_tracker/utils/enum.dart';
-import 'package:race_tracker/views/participant/widget/participant_form.dart';
 import 'package:race_tracker/widget/app_background.dart';
 import 'package:race_tracker/widget/app_bottom_navbar.dart';
 import 'package:race_tracker/widget/app_content.dart';

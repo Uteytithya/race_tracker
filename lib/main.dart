@@ -5,7 +5,6 @@ import 'package:race_tracker/firebase_options.dart';
 import 'package:race_tracker/provider/race_provider.dart';
 import 'package:race_tracker/provider/stamp_provider.dart';
 import 'package:race_tracker/provider/participant_provider.dart';
-import 'package:race_tracker/views/participant/participant_form_screen.dart';
 import 'package:race_tracker/views/participant/dashboard.dart';
 import 'package:race_tracker/views/race/race_screen.dart';
 import 'package:race_tracker/views/result/result_screen.dart';
