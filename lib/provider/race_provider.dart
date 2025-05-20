@@ -91,10 +91,10 @@ class RaceProvider with ChangeNotifier {
       try {
         for (var participant in participants) {
           // Assigned Start time and Status to participant
-          participant.status = ParticipantStatus.not_started;
+          participant.status = ParticipantStatus.ongoing;
           participant.startTime = _raceStartTime!;
           await _dbRef.child('participants/${participant.bib}').update({
-            'status': 'not_started',
+            'status': 'ongoing',
             'start_time': _raceStartTime!.toIso8601String(),
           });
         }
