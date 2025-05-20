@@ -53,7 +53,7 @@ class _TrackScreenState extends State<TrackScreen>
     // Load participants
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchData();
-      // Race timer will be handled by RaceProvider, no need to start it here
+      
     });
   }
 

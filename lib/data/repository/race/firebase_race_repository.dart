@@ -6,8 +6,6 @@ import 'package:race_tracker/model/race.dart';
 class FirebaseRaceRepository extends RaceRepository {
   final DatabaseReference _db = FirebaseDatabase.instance.ref();
 
-  
-
   @override
   Future<void> addRace(Race race) async {
     await _db.child("raceStatus").set(RaceDto.toJson(race));
