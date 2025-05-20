@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:race_tracker/views/participant/participant_form_screen.dart';
 import 'package:race_tracker/views/participant/widget/dashboard_content.dart';
-import 'package:race_tracker/views/participant/widget/participant_list.dart';
-import 'package:race_tracker/views/participant/widget/participant_table_header.dart';
-import 'package:race_tracker/views/participant/widget/participant_tile.dart';
 import 'package:race_tracker/widget/app_background.dart';
 import 'package:race_tracker/widget/app_bottom_navbar.dart';
 import 'package:race_tracker/widget/app_content.dart';
@@ -42,10 +38,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
       // Fetch participants from provider
       await context.read<ParticipantProvider>().fetchParticipants();
     } catch (e) {
-      // Handle any errors (could show a snackbar)
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error fetching participants: $e')),
+
+      if (mounted) {
+        // Handle any errors (could show a snackbar)
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error fetching participants: $e')),
       );
+      }
     } finally {
       if (mounted) {
         setState(() {

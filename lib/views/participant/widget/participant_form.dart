@@ -8,10 +8,7 @@ import 'package:race_tracker/provider/participant_provider.dart';
 class ParticipantForm extends StatefulWidget {
   final Participant? participant;
 
-  const ParticipantForm({
-    super.key,
-    this.participant,
-  });
+  const ParticipantForm({super.key, this.participant});
 
   @override
   State<ParticipantForm> createState() => _ParticipantFormState();
@@ -19,7 +16,7 @@ class ParticipantForm extends StatefulWidget {
 
 class _ParticipantFormState extends State<ParticipantForm> {
   final _formKey = GlobalKey<FormState>();
-  
+
   late final TextEditingController _bibController;
   late final TextEditingController _nameController;
   late final TextEditingController _ageController;
@@ -40,7 +37,7 @@ class _ParticipantFormState extends State<ParticipantForm> {
     _ageController = TextEditingController(
       text: widget.participant?.age.toString() ?? '',
     );
-    
+
     if (widget.participant != null) {
       _selectedGender = widget.participant!.gender;
     }
@@ -74,18 +71,20 @@ class _ParticipantFormState extends State<ParticipantForm> {
     // Add to provider
     try {
       final provider = context.read<ParticipantProvider>();
-      
+
       // Check if bib number already exists
       if (widget.participant == null) {
         final existingParticipant = await provider.getByBib(participant.bib);
         logger.w("Existing Participant: $existingParticipant");
         if (existingParticipant != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Bib number already exists'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Bib number already exists'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
           setState(() {
             _isLoading = false;
           });
@@ -94,7 +93,7 @@ class _ParticipantFormState extends State<ParticipantForm> {
         provider.addParticipant(participant);
       } else {
         // Find index of participant to update
-        final participants = await provider.participants;
+        final participants = provider.participants;
         final index = participants.indexWhere(
           (p) => p.bib == widget.participant!.bib,
         );
@@ -108,12 +107,14 @@ class _ParticipantFormState extends State<ParticipantForm> {
         Navigator.pop(context);
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error saving participant: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error saving participant: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -253,12 +254,13 @@ class _ParticipantFormState extends State<ParticipantForm> {
                       });
                     }
                   },
-                  items: Gender.values.map((Gender gender) {
-                    return DropdownMenuItem<Gender>(
-                      value: gender,
-                      child: Text(gender.name),
-                    );
-                  }).toList(),
+                  items:
+                      Gender.values.map((Gender gender) {
+                        return DropdownMenuItem<Gender>(
+                          value: gender,
+                          child: Text(gender.name),
+                        );
+                      }).toList(),
                 ),
               ),
             ),
@@ -277,15 +279,16 @@ class _ParticipantFormState extends State<ParticipantForm> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : Text(
-                        widget.participant == null ? 'Create' : 'Update',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                child:
+                    _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                          widget.participant == null ? 'Create' : 'Update',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
               ),
             ),
           ],

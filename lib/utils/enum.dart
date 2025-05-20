@@ -1,6 +1,3 @@
-
-import 'package:flutter/material.dart';
-import 'package:race_tracker/widget/app_custom_toast.dart';
 enum Gender{
   male("Male"),
   female("Female");

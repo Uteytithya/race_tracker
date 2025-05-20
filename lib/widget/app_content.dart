@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:race_tracker/views/race/widget/race_tab_bar.dart';
-
 class AppContent extends StatelessWidget {
 
   final Widget content;

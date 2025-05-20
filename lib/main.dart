@@ -24,9 +24,20 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ParticipantProvider()),
-        ChangeNotifierProvider(create: (_) => StampProvider()),
-        ChangeNotifierProvider(create: (_) => RaceProvider()),
+        ChangeNotifierProvider(create: (participantProvider) => ParticipantProvider()),
+        ChangeNotifierProvider(create: (stampProvider) => StampProvider()),
+        ChangeNotifierProvider(
+          create: (raceProvider) => RaceProvider(
+            participantProvider: Provider.of<ParticipantProvider>(
+              raceProvider,
+              listen: false,
+            ),
+            stampProvider: Provider.of<StampProvider>(
+              raceProvider,
+              listen: false,
+            ),
+          ),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

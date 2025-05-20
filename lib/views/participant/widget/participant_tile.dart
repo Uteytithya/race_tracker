@@ -15,7 +15,7 @@ class ParticipantTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFF101248).withOpacity(0.7),
+        color: const Color(0xFF101248).withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Padding(
@@ -29,8 +29,8 @@ class ParticipantTile extends StatelessWidget {
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: participant.gender == Gender.male
-                    ? Colors.blue.withOpacity(0.5)
-                    : Colors.pink.withOpacity(0.5),
+                    ? Colors.blue.withValues(alpha: 0.5)
+                    : Colors.pink.withValues(alpha: 0.5),
                 shape: BoxShape.circle,
               ),
               child: Text(
@@ -62,7 +62,7 @@ class ParticipantTile extends StatelessWidget {
                   Text(
                     '${participant.gender.name}, ${participant.age} years old',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 14,
                     ),
                   ),
@@ -74,7 +74,7 @@ class ParticipantTile extends StatelessWidget {
             const Spacer(),
             Icon(
               Icons.chevron_right,
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
             ),
           ],
         ),

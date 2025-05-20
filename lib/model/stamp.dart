@@ -4,11 +4,11 @@ class Stamp {
   final String segment;
   final DateTime time;
 
-  Stamp({int? bib, required String segment, required DateTime time, String? id})
+  Stamp({int? bib, required String newSegment, required DateTime newTime, String? id})
     : id = id ?? generateNextId(),
       bib = bib ?? 0,
-      segment = segment ?? '',
-      time = time ?? DateTime.now();
+      segment = newSegment,
+      time = newTime;
 
   static int _idCounter = 1;
 

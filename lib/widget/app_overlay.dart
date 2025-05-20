@@ -7,6 +7,6 @@ class AppOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(color: Colors.black.withOpacity(0.2));
+    return Container(color: Colors.black.withValues(alpha: 0.2));
   }
 }

@@ -8,9 +8,3 @@ final List<Participant> mockParticipants = [
   Participant(bib: 104,name: "Diana", gender: Gender.female, age: 28),
   Participant(bib: 105,name: "Evan", gender: Gender.male, age: 35),
 ];
-
-void main() {
-  for (var participant in mockParticipants) {
-    print(participant);
-  }
-}

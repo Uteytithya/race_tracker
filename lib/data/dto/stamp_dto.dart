@@ -5,8 +5,8 @@ class StampDto {
     return Stamp(
       id: json['id'] as String,
       bib: json['bib'] != null ? int.tryParse(json['bib'].toString()) : null,
-      segment: json['segment'] as String,
-      time: DateTime.parse(json['time']),
+      newSegment: json['segment'] as String,
+      newTime: DateTime.parse(json['time']),
     );
   }
 

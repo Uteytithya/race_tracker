@@ -6,18 +6,14 @@ import 'package:race_tracker/model/stamp.dart';
 import 'package:race_tracker/provider/participant_provider.dart';
 import 'package:race_tracker/provider/race_provider.dart';
 import 'package:race_tracker/provider/stamp_provider.dart';
-import 'package:race_tracker/utils/enum.dart';
 import 'package:race_tracker/views/track/widget/track_content.dart';
-import 'package:race_tracker/views/track/widget/track_grid_content.dart';
-import 'package:race_tracker/views/track/widget/track_segment_tab.dart';
-import 'package:race_tracker/views/track/widget/track_timer.dart';
 import 'package:race_tracker/widget/app_background.dart';
 import 'dart:async';
-
 import 'package:race_tracker/widget/app_bottom_navbar.dart';
 import 'package:race_tracker/widget/app_content.dart';
 import 'package:race_tracker/widget/app_header.dart';
 import 'package:race_tracker/widget/app_overlay.dart';
+import 'package:collection/collection.dart';
 
 class TrackScreen extends StatefulWidget {
   const TrackScreen({super.key});
@@ -29,7 +25,7 @@ class TrackScreen extends StatefulWidget {
 class _TrackScreenState extends State<TrackScreen>
     with SingleTickerProviderStateMixin {
   // Selected segment
-  String _selectedSegment = "Run"; // Default segment
+  String _selectedSegment = "Run";
 
   // Animation controller for card press
   late AnimationController _animationController;
@@ -63,7 +59,9 @@ class _TrackScreenState extends State<TrackScreen>
     try {
       await context.read<ParticipantProvider>().fetchParticipants();
       // Also fetch race data to get current timer state
-      await context.read<RaceProvider>().fetchRaceData();
+      if (mounted) {
+        await context.read<RaceProvider>().fetchRaceData();
+      }
     } catch (e) {
       debugPrint('Error fetching data: $e');
     } finally {
@@ -84,7 +82,7 @@ class _TrackScreenState extends State<TrackScreen>
     // Find the participant by bib
     Participant? participant;
     try {
-      participant = participantProvider.participants.firstWhere(
+      participant = participantProvider.participants.firstWhereOrNull(
         (p) => p.bib == bib,
       );
     } catch (e) {
@@ -92,12 +90,39 @@ class _TrackScreenState extends State<TrackScreen>
       return;
     }
 
+    if (participant == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Participant with BIB #$bib not found."),
+          duration: const Duration(seconds: 2),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (_selectedSegment != raceProvider.segments.first &&
+        !participant.stamps.any(
+          (stamp) =>
+              stamp.segment.toLowerCase() ==
+              raceProvider.segments.first.toLowerCase(),
+        )) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("You must stamp the first segment before continuing."),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     // Check if a stamp for the current segment already exists
-    final alreadyStamped = participant.stamps.any(
+    final alreadyStamped = participant.stamps.firstWhereOrNull(
       (s) => s.segment.toLowerCase() == _selectedSegment.toLowerCase(),
     );
 
-    if (alreadyStamped) {
+    if (alreadyStamped != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("BIB #$bib already has a $_selectedSegment stamp"),
@@ -124,28 +149,32 @@ class _TrackScreenState extends State<TrackScreen>
     // Create and add the stamp
     Stamp stamp = Stamp(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      segment: _selectedSegment,
-      time: DateTime.now(),
+      newSegment: _selectedSegment,
+      newTime: DateTime.now(),
       bib: bib,
     );
     try {
       await stampProvider.addStampToParticipant(stamp, bib);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("$_selectedSegment stamp recorded for BIB #$bib"),
-          duration: const Duration(seconds: 1),
-          backgroundColor: Colors.green,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("$_selectedSegment stamp recorded for BIB #$bib"),
+            duration: const Duration(seconds: 1),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     } catch (e) {
       debugPrint("Error adding stamp: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Failed to add stamp for BIB #$bib"),
-          duration: const Duration(seconds: 1),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Failed to add stamp for BIB #$bib"),
+            duration: const Duration(seconds: 1),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -158,8 +187,9 @@ class _TrackScreenState extends State<TrackScreen>
 
     // Find the participant by bib
     Participant? participant;
+    Logger().i(participant);
     try {
-      participant = participantProvider.participants.firstWhere(
+      participant = participantProvider.participants.firstWhereOrNull(
         (p) => p.bib == bib,
       );
     } catch (e) {
@@ -167,14 +197,37 @@ class _TrackScreenState extends State<TrackScreen>
       return;
     }
 
+    if (participant == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Participant with BIB #$bib not found."),
+          duration: const Duration(seconds: 2),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     // Find the stamp for the selected segment
     Stamp? stampToRemove;
+    Logger().i(stampToRemove);
     try {
-      stampToRemove = participant.stamps.firstWhere(
+      stampToRemove = participant.stamps.firstWhereOrNull(
         (s) => s.segment.toLowerCase() == _selectedSegment.toLowerCase(),
       );
     } catch (_) {
       Logger().i("No $_selectedSegment stamp found for BIB #$bib");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("No $_selectedSegment stamp to remove for BIB #$bib"),
+          duration: const Duration(seconds: 1),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    if (stampToRemove == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("No $_selectedSegment stamp to remove for BIB #$bib"),
@@ -199,21 +252,25 @@ class _TrackScreenState extends State<TrackScreen>
         stampToRemove,
         bib, // Convert bib to String
       );
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("$_selectedSegment stamp removed for BIB #$bib"),
-          duration: const Duration(seconds: 1),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("$_selectedSegment stamp removed for BIB #$bib"),
+            duration: const Duration(seconds: 1),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Failed to remove stamp for BIB #$bib"),
-          duration: const Duration(seconds: 1),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Failed to remove stamp for BIB #$bib"),
+            duration: const Duration(seconds: 1),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 

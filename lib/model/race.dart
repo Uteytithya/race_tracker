@@ -1,5 +1,3 @@
-import 'package:race_tracker/utils/enum.dart';
-
 class Race {
   final String status;
   final DateTime? startTime;

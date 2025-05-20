@@ -42,10 +42,10 @@ class TimeCalculator {
     int minutes = duration.inMinutes % 60;
     int seconds = duration.inSeconds % 60;
     int milliseconds = duration.inMilliseconds % 1000;
-    return '${hours.toString().padLeft(2, '0')}:'
-        '${minutes.toString().padLeft(2, '0')}:'
-        '${seconds.toString().padLeft(2, '0')}.'
-        '${milliseconds.toString().padLeft(3, '0')}';
+    return '${hours.toString().padLeft(2, '0')}h '
+        '${minutes.toString().padLeft(2, '0')}mn '
+        '${seconds.toString().padLeft(2, '0')}s '
+        '${milliseconds.toString().padLeft(3, '0')}ms';
   }
 
   static int compareTimeStrings(String timeA, String timeB) {

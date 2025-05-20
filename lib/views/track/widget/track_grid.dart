@@ -52,15 +52,13 @@ class TrackGrid extends StatelessWidget {
         itemBuilder: (context, index) {
           final participant = activeParticipants[index];
           final bool isAnimating = animatingBib == participant.bib;
-
           // Inside _buildBibGrid
           return GestureDetector(
             onTap: () => handleAddStampForBib(participant.bib),
             onLongPress:
                 () => handleRemoveStampForBib(
                   participant.stamps.firstWhere(
-                    (s) =>
-                        s.segment.toLowerCase() ==
+                    (s) => s.segment.toLowerCase() ==
                         selectedSegment.toLowerCase(),
                   ),
                   participant.bib,
@@ -74,7 +72,7 @@ class TrackGrid extends StatelessWidget {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha: 0.2),
                       blurRadius: 5,
                       offset: const Offset(0, 2),
                     ),
