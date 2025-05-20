@@ -18,7 +18,7 @@ class AppContent extends StatelessWidget {
       bottom: 0,
       child: Container(
         decoration: const BoxDecoration(
-          color: Color(0xFF4758E0),
+            color: Color(0xFF4758E0),
           borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
         ),
         padding: const EdgeInsets.all(12),

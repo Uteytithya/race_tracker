@@ -13,6 +13,10 @@ class ParticipantProvider extends ChangeNotifier {
 
   List<Participant> get participants => _participants;
 
+  ParticipantProvider() {
+    fetchParticipants();
+  }
+
   Future<void> fetchParticipants() async {
     try {
       _participants = await _repository.getAllParticipants();

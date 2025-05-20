@@ -4,7 +4,6 @@ import 'package:race_tracker/views/participant/widget/dashboard_content.dart';
 import 'package:race_tracker/widget/app_background.dart';
 import 'package:race_tracker/widget/app_bottom_navbar.dart';
 import 'package:race_tracker/widget/app_content.dart';
-import 'package:race_tracker/widget/app_custom_toast.dart';
 import 'package:race_tracker/widget/app_header.dart';
 import 'package:race_tracker/widget/app_overlay.dart';
 import '../../../provider/participant_provider.dart';
@@ -52,34 +51,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         });
       }
     }
-  }
-
-  void showCustomToast({
-    required BuildContext context,
-    required String message,
-    required VoidCallback onUndo,
-  }) {
-    final overlay = Overlay.of(context);
-    late OverlayEntry entry;
-
-    entry = OverlayEntry(
-      builder:
-          (context) => Positioned(
-            bottom: 40,
-            left: 20,
-            right: 20,
-            child: AppCustomToast(
-              message: message,
-              onUndo: () {
-                onUndo();
-                entry.remove();
-              },
-              onClose: () => entry.remove(),
-            ),
-          ),
-    );
-
-    overlay.insert(entry);
   }
 
   @override

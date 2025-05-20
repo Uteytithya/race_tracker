@@ -34,9 +34,6 @@ class TrackContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Timer display - using global timer from RaceProvider
-        TrackTimer(raceProvider: raceProvider),
-
         // Segment Sub-Tabs
         TrackSegmentTab(
           selectedSegment: selectedSegment,

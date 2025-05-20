@@ -9,16 +9,22 @@ import 'package:race_tracker/provider/stamp_provider.dart';
 import 'package:race_tracker/utils/enum.dart';
 
 class RaceProvider with ChangeNotifier {
-  RaceProvider({
-    required ParticipantProvider participantProvider,
-    required StampProvider stampProvider,
-  }) : _participantProvider = participantProvider,
-       _stampProvider = stampProvider;
+  
 
   final DatabaseReference _dbRef = FirebaseDatabase.instance.ref();
 
-  final ParticipantProvider _participantProvider;
-  final StampProvider _stampProvider;
+  late ParticipantProvider _participantProvider;
+  late StampProvider _stampProvider;
+
+  void updateProviders(ParticipantProvider pp, StampProvider sp) {
+    _participantProvider = pp;
+    _stampProvider = sp;
+    notifyListeners();
+  }
+
+  RaceProvider() {
+    fetchRaceData();
+  }
 
   final Logger logger = Logger();
   final List<String> segments = [
@@ -151,18 +157,6 @@ class RaceProvider with ChangeNotifier {
     }
   }
 
-  Future<void> markParticipantFinished(int bib) async {
-    final index = participants.indexWhere((p) => p.bib == bib);
-    if (index != -1) {
-      participants[index].status = ParticipantStatus.finished;
-      await _dbRef.child('participants/$bib').update({
-        'status': 'finished',
-        'finishTime': DateTime.now().toIso8601String(),
-      });
-      notifyListeners();
-    }
-  }
-
   Future<void> resetRace() async {
     _isRaceActive = false;
     _raceStartTime = null;
@@ -183,7 +177,7 @@ class RaceProvider with ChangeNotifier {
         'status': 'not_started',
         'start_time': null,
         'finish_time': null,
-        'stamps': [],
+        'stamps': {},
       });
     }
     notifyListeners();

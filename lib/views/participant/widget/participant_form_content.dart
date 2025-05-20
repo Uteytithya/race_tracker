@@ -19,11 +19,9 @@ class ParticipantFormContent extends StatelessWidget {
       children: [
         const SizedBox(height: 16),
         Expanded(
-          child: SingleChildScrollView(
-            child: ParticipantForm(
-              participant:
-                  participant, // Pass the participant for editing
-            ),
+          child: ParticipantForm(
+            participant:
+                participant, // Pass the participant for editing
           ),
         ),
       ],

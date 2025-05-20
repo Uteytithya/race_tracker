@@ -17,4 +17,9 @@ class Stamp {
 
   static String generateNextId() =>
       'S-${_idCounter.toString().padLeft(3, '0')}';
+
+  @override
+  String toString() {
+    return 'Stamp{id: $id, bib: $bib, segment: $segment, time: $time}';
+  }
 }

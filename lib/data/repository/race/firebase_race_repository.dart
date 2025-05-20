@@ -6,6 +6,8 @@ import 'package:race_tracker/model/race.dart';
 class FirebaseRaceRepository extends RaceRepository {
   final DatabaseReference _db = FirebaseDatabase.instance.ref();
 
+  
+
   @override
   Future<void> addRace(Race race) async {
     await _db.child("raceStatus").set(RaceDto.toJson(race));
@@ -42,11 +44,5 @@ class FirebaseRaceRepository extends RaceRepository {
   Future<void> deleteRace(String id) async {
     await _db.child("raceStatus").remove();
     await _db.child("segments").remove();
-    await _db.child("stamps").remove();
-  }
-
-  Future<void> resetAndAddNewRace(Race newRace) async {
-    await deleteRace("current");
-    await addRace(newRace);
   }
 }

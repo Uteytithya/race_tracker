@@ -7,6 +7,7 @@ import 'package:race_tracker/provider/participant_provider.dart';
 import 'package:race_tracker/provider/race_provider.dart';
 import 'package:race_tracker/provider/stamp_provider.dart';
 import 'package:race_tracker/views/track/widget/track_content.dart';
+import 'package:race_tracker/views/track/widget/track_timer.dart';
 import 'package:race_tracker/widget/app_background.dart';
 import 'dart:async';
 import 'package:race_tracker/widget/app_bottom_navbar.dart';
@@ -36,6 +37,9 @@ class _TrackScreenState extends State<TrackScreen>
   // Loading state
   bool _isLoading = true;
 
+  // Search query for filtering by bib
+  String _searchQuery = '';
+
   @override
   void initState() {
     super.initState();
@@ -59,9 +63,7 @@ class _TrackScreenState extends State<TrackScreen>
     try {
       await context.read<ParticipantProvider>().fetchParticipants();
       // Also fetch race data to get current timer state
-      if (mounted) {
-        await context.read<RaceProvider>().fetchRaceData();
-      }
+      await context.read<RaceProvider>().fetchRaceData();
     } catch (e) {
       debugPrint('Error fetching data: $e');
     } finally {
@@ -72,7 +74,6 @@ class _TrackScreenState extends State<TrackScreen>
   }
 
   void _handleAddStampForBib(int bib) async {
-    final raceProvider = context.read<RaceProvider>();
     final stampProvider = Provider.of<StampProvider>(context, listen: false);
     final participantProvider = Provider.of<ParticipantProvider>(
       context,
@@ -101,22 +102,6 @@ class _TrackScreenState extends State<TrackScreen>
       return;
     }
 
-    if (_selectedSegment != raceProvider.segments.first &&
-        !participant.stamps.any(
-          (stamp) =>
-              stamp.segment.toLowerCase() ==
-              raceProvider.segments.first.toLowerCase(),
-        )) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("You must stamp the first segment before continuing."),
-          duration: Duration(seconds: 2),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-
     // Check if a stamp for the current segment already exists
     final alreadyStamped = participant.stamps.firstWhereOrNull(
       (s) => s.segment.toLowerCase() == _selectedSegment.toLowerCase(),
@@ -133,19 +118,6 @@ class _TrackScreenState extends State<TrackScreen>
       return;
     }
 
-    // Animate the pressed BIB card
-    setState(() => _animatingBib = bib);
-    _animationController.forward().then((_) {
-      _animationController.reverse().then((_) {
-        setState(() => _animatingBib = null);
-      });
-    });
-
-    // Start the race if not active
-    if (!raceProvider.isRaceActive) {
-      await raceProvider.startRace();
-    }
-
     // Create and add the stamp
     Stamp stamp = Stamp(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -153,6 +125,7 @@ class _TrackScreenState extends State<TrackScreen>
       newTime: DateTime.now(),
       bib: bib,
     );
+    Logger().i(stamp);
     try {
       await stampProvider.addStampToParticipant(stamp, bib);
       if (mounted) {
@@ -248,10 +221,7 @@ class _TrackScreenState extends State<TrackScreen>
 
     // Remove the stamp
     try {
-      await stampProvider.removeStampFromParticipant(
-        stampToRemove,
-        bib, // Convert bib to String
-      );
+      await stampProvider.removeStampFromParticipant(stampToRemove, bib);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -286,6 +256,12 @@ class _TrackScreenState extends State<TrackScreen>
     final participantProvider = context.watch<ParticipantProvider>();
     final raceProvider = context.watch<RaceProvider>();
 
+    // Filter participants based on the search query (by bib)
+    List<Participant> filteredParticipants =
+        participantProvider.participants
+            .where((p) => p.bib.toString().contains(_searchQuery))
+            .toList();
+
     return Scaffold(
       body: Stack(
         children: [
@@ -305,20 +281,56 @@ class _TrackScreenState extends State<TrackScreen>
                     ? const Center(
                       child: CircularProgressIndicator(color: Colors.white),
                     )
-                    : TrackContent(
-                      raceProvider: raceProvider,
-                      participants: participantProvider.participants,
-                      handleAddStampForBib: _handleAddStampForBib,
-                      handleRemoveStampForBib: _handleRemoveStampForBib,
-                      fetchData: _fetchData,
-                      selectedSegment: _selectedSegment,
-                      onSegmentSelected: (segment) {
-                        setState(() {
-                          _selectedSegment = segment;
-                        });
-                      },
-                      animatingBib: _animatingBib,
-                      isRaceActive: raceProvider.isRaceActive,
+                    : Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            children: [
+                              // Timer display - using global timer from RaceProvider
+                              TrackTimer(raceProvider: raceProvider),
+                              const Spacer(),
+                              SizedBox(
+                                width: 200,
+                                child: TextField(
+                                  textAlign: TextAlign.right,
+                                  keyboardType: TextInputType.number,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Search by BIB',
+                                    labelStyle: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                    ),
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _searchQuery = value;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: TrackContent(
+                            raceProvider: raceProvider,
+                            participants: filteredParticipants,
+                            handleAddStampForBib: _handleAddStampForBib,
+                            handleRemoveStampForBib: _handleRemoveStampForBib,
+                            fetchData: _fetchData,
+                            selectedSegment: _selectedSegment,
+                            onSegmentSelected: (segment) {
+                              setState(() {
+                                _selectedSegment = segment;
+                              });
+                            },
+                            animatingBib: _animatingBib,
+                            isRaceActive: raceProvider.isRaceActive,
+                          ),
+                        ),
+                      ],
                     ),
           ),
         ],

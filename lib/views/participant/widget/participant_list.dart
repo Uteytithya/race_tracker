@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:race_tracker/model/participant.dart';
 import 'package:race_tracker/provider/participant_provider.dart';
+import 'package:race_tracker/views/participant/widget/participant_form.dart';
 import 'package:race_tracker/views/participant/widget/participant_tile.dart';
 
 class ParticipantList extends StatelessWidget {
@@ -58,6 +59,7 @@ class ParticipantList extends StatelessWidget {
                       onDismissed: (_) {
                         final removed = participant;
                         participantProvider.removeParticipant(removed);
+                        
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text('Participant removed'),
@@ -70,15 +72,18 @@ class ParticipantList extends StatelessWidget {
                           ),
                         );
                       },
-                      child: GestureDetector(
+                      child: ListTile(
                         onTap: () {
-                          Navigator.pushNamed(
+                          Navigator.push(
                             context,
-                            'editParticipant',
-                            arguments: participant,
+                            MaterialPageRoute(
+                              builder: (context) => ParticipantForm(
+                                participant: participant,
+                              ),
+                            ),
                           );
                         },
-                        child: ParticipantTile(participant: participant),
+                        title: ParticipantTile(participant: participant),
                       ),
                     );
                   },

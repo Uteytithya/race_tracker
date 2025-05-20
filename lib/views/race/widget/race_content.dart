@@ -47,13 +47,12 @@ class RaceContent extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 8),
               child: ElevatedButton(
-                onPressed: !isRaceActive ? () {
-                  if (raceProvider.isTimerReset) {
-                    raceProvider.startRace();
-                  } else {
-                    raceProvider.startRace();
-                  }
-                } : null,
+                onPressed:
+                    !isRaceActive
+                        ? () {
+                          raceProvider.startRace();
+                        }
+                        : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF344BD0),
                   foregroundColor: Colors.white,
@@ -64,7 +63,7 @@ class RaceContent extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  raceProvider.isTimerReset ? 'Start' : 'Continue',
+                   'Start',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,

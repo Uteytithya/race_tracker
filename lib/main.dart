@@ -14,29 +14,22 @@ import 'package:race_tracker/views/track/track_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const MyApp());
-}
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
+  runApp(
+    MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (participantProvider) => ParticipantProvider()),
-        ChangeNotifierProvider(create: (stampProvider) => StampProvider()),
-        ChangeNotifierProvider(
-          create: (raceProvider) => RaceProvider(
-            participantProvider: Provider.of<ParticipantProvider>(
-              raceProvider,
-              listen: false,
-            ),
-            stampProvider: Provider.of<StampProvider>(
-              raceProvider,
-              listen: false,
-            ),
-          ),
+        ChangeNotifierProvider(create: (_) => ParticipantProvider()),
+        ChangeNotifierProvider(create: (_) => StampProvider()),
+        ChangeNotifierProxyProvider2<
+          ParticipantProvider,
+          StampProvider,
+          RaceProvider
+        >(
+          create: (_) => RaceProvider(),
+          update:
+              (_, participantProvider, stampProvider, raceProvider) =>
+                  raceProvider!
+                    ..updateProviders(participantProvider, stampProvider),
         ),
       ],
       child: MaterialApp(
@@ -46,18 +39,16 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        initialRoute: '/',
+        home: const DashboardScreen(),
         routes: {
-          '/': (context) => const DashboardScreen(),
-          '/form': (context) => const ParticipantFormScreen(),
+          '/dashboard': (context) => const DashboardScreen(),
           '/track': (context) => const TrackScreen(),
           '/race': (context) => const RaceScreen(),
           '/result': (context) => const ResultScreen(),
         },
         onUnknownRoute:
-            (settings) =>
-                MaterialPageRoute(builder: (_) => const DashboardScreen()),
+            (_) => MaterialPageRoute(builder: (_) => const DashboardScreen()),
       ),
-    );
-  }
+    ),
+  );
 }

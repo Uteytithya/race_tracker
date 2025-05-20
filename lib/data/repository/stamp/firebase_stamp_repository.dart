@@ -20,6 +20,7 @@ class FirebaseStampRepository {
 
   Future<void> addStampToParticipant(Stamp stamp, int bib) async {
     try {
+      Logger().i("Adding stamp ${stamp.id} for BIB #$bib to Firebase");
       await _participantRef
           .child(bib.toString())
           .child("stamps")

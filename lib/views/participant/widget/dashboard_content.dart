@@ -50,7 +50,6 @@ class DashboardContent extends StatelessWidget {
                     size: 24,
                   ),
                 ),
-                // Add button
                 IconButton(
                   onPressed: () {
                     Navigator.push(
